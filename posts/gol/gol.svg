@@ -1,0 +1,178 @@
+<svg
+  xmlns="http://www.w3.org/2000/svg"
+  viewBox="0 0 720 392"
+  width="100%"
+  height="100%"
+  preserveAspectRatio="xMidYMid meet"
+  style="cursor:crosshair"
+>
+  <rect width="100%" height="100%" fill="#000" rx="6" />
+
+  <foreignObject x="0" y="0" width="720" height="32">
+    <div
+      xmlns="http://www.w3.org/1999/xhtml"
+      style="display:flex; align-items:center; height:32px; padding:0 12px; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif; color:#fff; box-sizing:border-box;"
+    >
+      <span style="font-weight:bold; font-size:14px;">game of life</span>
+      <span style="flex:1" />
+      <span id="gen" style="font-size:11px; margin-right:16px;">generation 0</span>
+      <span id="pop" style="font-size:11px; margin-right:16px;">population 0</span>
+      <span id="clear" style="font-size:11px; cursor:pointer; margin-right:16px;">clear</span>
+      <span id="rand" style="font-size:11px; cursor:pointer; margin-right:16px;">randomize</span>
+      <span
+        id="step"
+        style="font-size:11px; cursor:pointer; margin-right:16px; display:none;"
+      >step</span>
+      <span id="ctrl" style="font-size:11px; cursor:pointer;">pause</span>
+    </div>
+  </foreignObject>
+
+  <g id="board" transform="translate(0,32)">
+    <defs>
+      <pattern id="g" width="12" height="12" patternUnits="userSpaceOnUse">
+        <rect width="12" height="12" fill="#000" stroke="#111" stroke-width="0.5" />
+      </pattern>
+    </defs>
+    <rect width="720" height="360" fill="url(#g)" />
+  </g>
+
+  <script type="text/javascript">
+  // <![CDATA[
+  (function() {
+    var COLS = 60, ROWS = 30, CELL = 12, TOP = 32;
+    var FPS = 10;
+    var ALIVE = '#fff', DEAD = '#000';
+
+    var cur = new Uint8Array(COLS * ROWS);
+    var nxt = new Uint8Array(COLS * ROWS);
+    var generation = 0;
+
+    for (var i = 0; i < cur.length; i++) cur[i] = Math.random() < 0.15 ? 1 : 0;
+
+    var NS = 'http://www.w3.org/2000/svg';
+    var board = document.getElementById('board');
+    var genLabel = document.getElementById('gen');
+    var popLabel = document.getElementById('pop');
+
+    var rects = new Array(COLS * ROWS);
+    for (var r = 0; r < ROWS; r++) {
+      for (var c = 0; c < COLS; c++) {
+        var el = document.createElementNS(NS, 'rect');
+        el.setAttribute('x', c * CELL + 0.5);
+        el.setAttribute('y', r * CELL + 0.5);
+        el.setAttribute('width', CELL - 0.5);
+        el.setAttribute('height', CELL - 0.5);
+        el.setAttribute('fill', cur[r * COLS + c] ? ALIVE : DEAD);
+        board.appendChild(el);
+        rects[r * COLS + c] = el;
+      }
+    }
+
+    function neighbors(c, r) {
+      var n = 0;
+      for (var dr = -1; dr <= 1; dr++) {
+        for (var dc = -1; dc <= 1; dc++) {
+          if (dr === 0 && dc === 0) continue;
+          n += cur[((r + dr + ROWS) % ROWS) * COLS + ((c + dc + COLS) % COLS)];
+        }
+      }
+      return n;
+    }
+
+    function step() {
+      for (var r = 0; r < ROWS; r++) {
+        for (var c = 0; c < COLS; c++) {
+          var n = neighbors(c, r), k = r * COLS + c;
+          nxt[k] = cur[k] ? ((n === 2 || n === 3) ? 1 : 0) : (n === 3 ? 1 : 0);
+        }
+      }
+      var t = cur; cur = nxt; nxt = t;
+      generation++;
+    }
+
+    function render() {
+      for (var i = 0; i < cur.length; i++) {
+        var color = cur[i] ? ALIVE : DEAD;
+        if (rects[i].getAttribute('fill') !== color) rects[i].setAttribute('fill', color);
+      }
+      var population = 0;
+      for (var j = 0; j < cur.length; j++) population += cur[j];
+      genLabel.textContent = 'generation ' + generation;
+      popLabel.textContent = 'population ' + population;
+    }
+
+    function cellAt(evt) {
+      var svg = board.ownerSVGElement;
+      var pt = svg.createSVGPoint();
+      var src = evt.touches ? evt.touches[0] : evt;
+      pt.x = src.clientX; pt.y = src.clientY;
+      var ctm = svg.getScreenCTM();
+      if (!ctm) return null;
+      var loc = pt.matrixTransform(ctm.inverse());
+      var c = Math.floor(loc.x / CELL), r = Math.floor((loc.y - TOP) / CELL);
+      if (r < 0) return null;
+      if (c < 0 || c >= COLS || r < 0 || r >= ROWS) return null;
+      return [c, r];
+    }
+
+    function spawn(evt) {
+      var p = cellAt(evt);
+      if (!p) return;
+      cur[p[1] * COLS + p[0]] = 1;
+      render();
+    }
+
+    var dragging = false;
+    var svg = board.ownerSVGElement;
+    svg.addEventListener('mousedown', function(e) { dragging = true; spawn(e); });
+    svg.addEventListener('mousemove', function(e) { if (dragging) spawn(e); });
+    svg.addEventListener('mouseup', function() { dragging = false; });
+    svg.addEventListener('mouseleave', function() { dragging = false; });
+    svg.addEventListener('touchstart', function(e) { e.preventDefault(); dragging = true; spawn(e); }, {passive:false});
+    svg.addEventListener('touchmove', function(e) { e.preventDefault(); if (dragging) spawn(e); }, {passive:false});
+    svg.addEventListener('touchend', function() { dragging = false; });
+
+    var paused = false;
+    var ctrl = document.getElementById('ctrl');
+    var stepBtn = document.getElementById('step');
+    var clearBtn = document.getElementById('clear');
+    var randBtn = document.getElementById('rand');
+
+    ctrl.addEventListener('click', function(e) {
+      e.stopPropagation();
+      paused = !paused;
+      ctrl.textContent = paused ? 'play' : 'pause';
+      stepBtn.style.display = paused ? '' : 'none';
+    });
+
+    stepBtn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      step();
+      render();
+    });
+
+    clearBtn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      for (var i = 0; i < cur.length; i++) cur[i] = 0;
+      generation = 0;
+      render();
+    });
+
+    randBtn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      for (var i = 0; i < cur.length; i++) cur[i] = Math.random() < 0.15 ? 1 : 0;
+      generation = 0;
+      render();
+    });
+
+    setInterval(function() {
+      if (!paused) { step(); render(); }
+    }, 1000 / FPS);
+
+
+
+    render();
+  })();
+  // ]]>
+  </script>
+</svg>
