@@ -1,8 +1,6 @@
 .git
 .github
-.tmp-*
 public
-infra
 Dockerfile
 .dockerignore
 justfile

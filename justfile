@@ -6,9 +6,8 @@ compile:
     #!/usr/bin/env sh
     set -eu
     sh ./scripts/sync-fonts.sh --check >/dev/null
-    sh ./scripts/link-packages.sh >/dev/null
     rm -rf public
-    typst compile --package-path .tmp-pkg --features html,bundle --format bundle site.typ public
+    typst compile --features html,bundle --format bundle site.typ public
 
 # Fetch/update upstream STIX Two + Commit Mono .woff2 web fonts and regenerate SHA256SUMS
 sync-fonts:
@@ -16,10 +15,7 @@ sync-fonts:
 
 # Live-reloading bundle server via Typst 0.15's built-in `typst watch -f bundle`
 serve port="8080":
-    #!/usr/bin/env sh
-    set -eu
-    sh ./scripts/link-packages.sh >/dev/null
-    typst watch --package-path .tmp-pkg --features html,bundle --format bundle --port "{{port}}" site.typ public
+    typst watch --features html,bundle --format bundle --port "{{port}}" site.typ public
 
 # Compile and serve public/ straight from disk matching static-web-server (`sws.toml` .typ headers + 404.html)
 dev: compile
@@ -76,14 +72,7 @@ dev: compile
 
 # Live-preview a post (or site.typ) in paged mode while writing
 watch target="site.typ":
-    #!/usr/bin/env sh
-    set -eu
-    sh ./scripts/link-packages.sh >/dev/null
-    typst watch --package-path .tmp-pkg "{{target}}"
-
-# Expose vendor/* as a local @preview package root in .tmp-pkg (see vendor/README.md)
-link-packages:
-    sh ./scripts/link-packages.sh
+    typst watch "{{target}}"
 
 # Build the production image (same build as CI)
 build:

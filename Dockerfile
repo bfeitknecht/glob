@@ -27,12 +27,10 @@ RUN apk add --no-cache ca-certificates curl unzip xz && \
 WORKDIR /build
 COPY . .
 
-# Verify SHA-256 checksums of self-hosted web fonts in `fonts/`, expose the pinned
-# `vendor/{thyme,exemel}` copies as a local `@preview` package root, and compile `/public`
-# (no package downloads at build time: `typst --package-path` resolves them offline).
+# Verify SHA-256 checksums of self-hosted web fonts in `fonts/` and compile `/public`.
+# `@preview/thyme:0.1.0` and `@preview/exemel:0.3.0` come from Typst Universe.
 RUN sh ./scripts/sync-fonts.sh --check && \
-    sh ./scripts/link-packages.sh .tmp-pkg && \
-    typst compile --package-path .tmp-pkg --font-path /fonts --features html,bundle --format bundle site.typ /public
+    typst compile --font-path /fonts --features html,bundle --format bundle site.typ /public
 
 # Stage 2: static-web-server (Rust, ~4 MB, musl-static, no runtime dependencies)
 # copied into an empty filesystem — same pattern as bfeitknecht/apex.
