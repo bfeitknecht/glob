@@ -24,9 +24,8 @@
 
 Notes on programming languages, formal methods, computer systems, and miscellaneous rabbit holes.
 
-#links-row(
+#links(
   link("https://0xbf.ch")[0xbf.ch],
-  link("https://github.com/bfeitknecht")[github],
   [@rss[rss]],
   [@atom[atom]],
 )
