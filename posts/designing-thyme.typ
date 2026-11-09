@@ -21,7 +21,7 @@ The first version was a single blog template with the name `typica`. It went thr
 
 The first prototype had all parts in the same place. The routing, the feed generation, and the `<head>` metadata were next to the serif typography and the sidenote CSS. This was sufficient for `*glob?`. But a smaller personal site such as #link("https://0xbf.ch")[`0xbf.ch`] could not use the site functions without also using the blog styles.
 
-We divided the package into two layers. The first layer is a core with no typography CSS. Import `@preview/thyme:0.1.0` to get the core functions: `site`, `webpage`, `mount`, `raw-file`, `htm`, `h`, `tr`, `sitemap.xml`, `robots.txt`, `404.html`, and the feeds. The second layer is the `blog` preset. Import it with `#import blog: *`, or give `preset: blog` to `site.with(...)`. The preset adds the monochrome `oklch` palette, the _STIX Two_ + _Helvetica Neue_ + _Commit Mono_ font stacks, right-margin sidenotes#sidenote[The bordered theorem, definition, proof, and crosshair table styles come from `spicky` (`github.com/bfeitknecht/spicky`). We adapted them for light mode, dark mode, and two-column print.], `/tags/` pages, and `<dl>` frontmatter.
+We divided the package into two layers. The first layer is a core with no typography CSS. Import `@preview/thyme:0.1.0` to get the core functions: `site`, `webpage`, `mount`, `file`, `htm`, `h`, `tr`, `sitemap.xml`, `robots.txt`, `404.html`, and the feeds. The second layer is the `blog` preset. Import it with `#import blog: *` and then use its `site` in place of the core `site`. The preset adds the monochrome `oklch` palette, the _STIX Two_ + _Helvetica Neue_ + _Commit Mono_ font stacks, right-margin sidenotes#sidenote[The bordered theorem, definition, proof, and crosshair table styles come from `spicky` (`github.com/bfeitknecht/spicky`). We adapted them for light mode, dark mode, and two-column print.], `/tags/` pages, and `<dl>` frontmatter.
 
 We also did not use an external wrapper CLI. Other Typst site tools start a second program to scan directories and to serve the site. But `typst watch --features html,bundle -f bundle site.typ public` already watches the imports and serves live-reloaded HTML. The complete site graph stays in `site.typ`. Thus the site needs no extra tool to install or to maintain.
 
@@ -49,7 +49,7 @@ A custom layout with raw `html.elem("section", attrs: (...), ...)` calls becomes
 
 Both helpers look up the constructors in `dictionary(html)`. Thus standard elements use the typed `html.*` functions of Typst `0.15.1`. The helpers use `html.elem` only when `data-*`, `aria-*`, or custom attributes are necessary.
 
-The plain-text `.typ` sources beside each HTML page caused a problem with the Typst package sandbox. Inside `@preview/thyme`, a string path is relative to the package directory, not to the directory of the user. Thus a library function cannot read `posts/impli.typ` by its string name. The `path(...)` type in Typst `0.15` keeps the read capability across package boundaries. The library accepts `src: path("site.typ")` and `#post(path("posts/impli.typ"))`. Then `thyme` reads the file and writes its raw bytes to the same URL tree (`/index.typ`, `/posts/impli.typ`). The `.typ` link in the top bar opens these files.
+The plain-text `.typ` sources beside each HTML page caused a problem with the Typst package sandbox. Inside `@preview/thyme`, a string path is relative to the package directory, not to the directory of the user. Thus a library function cannot read `posts/impli.typ` by its string name. The `path(...)` type in Typst `0.15` keeps the read capability across package boundaries. The library accepts `src: path("site.typ")` and `#post(path("posts/impli.typ"))`. Then `thyme` reads the file and writes its raw bytes to the same URL tree (`/site.typ`, `/posts/impli.typ`). The `.typ` link in the top bar opens these files.
 
 For the XML sitemap and the feeds, we extended `@preview/exemel` to `0.3.0`. It now has `sitemap-encode` and `rss-encode` in addition to `atom-encode`. We also added an optional serializer to `thyme` (`feed-content: "full"`). It converts the post content into semantic HTML for feed readers.
 
@@ -84,6 +84,24 @@ We tested Kleene fixed-point formulas in Firefox, Chromium, and WebKit. The test
 ]
 
 One more problem occurred only in the paged PDF output (`just watch posts/impli.typ` and `docs/manual.pdf`). On the web, a sidenote marker is a serif superscript with a thin underline below the digit. In the PDF, the underline was on the baseline of the main text. The default `super(..., typographic: true)` uses the OpenType `sups` feature of _STIX Two Text_. This feature puts a higher glyph in the normal em-box but does not move `text.baseline`. We changed the paged marker to `super(typographic: false, size: 0.7em, baseline: -0.42em, underline(...))`. We also added metadata to sidenote links, so the outer `show link` rules do not change them. Now the underline is directly below the superscript in the PDF too.
+
+= The Last Cleanup Pass <cleanup>
+
+The last audit found three defects. None of them was a compile error. A browser showed all three.
+
+#grid-table[
+  | *Defect* | *Cause* | *Fix* |
+  | --- | --- | --- |
+  | The text looked bold and italic | `@font-face` wrote `font-weight: "400"` and `font-style: "normal"`. CSS takes these two descriptors only as keywords | We removed the quotes. All eleven faces are valid now |
+  | The CSS colour did not agree with the palette | The lightness value in `oklch()` had long decimals | The lightness uses whole numbers: paper `96%`, text `21%`, and dark paper `17%` |
+  | The first heading had the id `posts-2` | The duplicate check used `before()`, and `before()` counts the current heading | The check reads only the headings above the current one. A real duplicate still gets a suffix |
+]
+
+The quoted descriptors caused the largest damage. A browser drops an invalid descriptor and keeps the family name. Thus all text used the same face for each weight and each style. The font stacks were correct. The `.woff2` files were correct. Only the CSS was wrong.
+
+The palette needs exact values because the design notes give hex codes. `oklch(96% 0 0)` is `#f2f2f2`, but the same token with a long decimal is a different hex code that nobody can compute in the head. The new helper `css-hex` writes any colour as a `#rrggbb` value, for the places that do not take `oklch()`, such as `<meta name="theme-color">`.
+
+The heading ids were the quietest defect. The table of contents used the same wrong id as the heading, so every inner link worked and no check failed. But the anchors were not stable between pages. A reader who copied a fragment got a number that was not in the text.
 
 = Build Results and Session Time <numbers>
 
