@@ -5,7 +5,7 @@ Personal blog at [blog.0xbf.ch](https://blog.0xbf.ch). Authored in pure [Typst](
 ## Layout
 
 ```text
-site.typ                             homepage (<site>), feeds, sitemap, and mounted posts
+site.typ                             homepage (<site>), feeds, sitemap, mounted posts, hue-free theme palette
 posts/                               standalone `.typ` files, or a directory when co-locating assets
 ├── designing-thyme.typ               Designing thyme
 ├── rabbit-holes.typ                 New Rabbit Holes Await (bkf6)
@@ -16,11 +16,13 @@ posts/                               standalone `.typ` files, or a directory whe
 ├── trigraphs.typ                    Try Some Trigraphs! (bkf3)
 ├── yak-shaving.typ                  Yak Shaving Utensils & Co. (bkf2)
 └── impli.typ                        `impli`, My Beloved (bkf1)
+assets/mono.css                      hue-free guardrails over thyme's blog CSS (zebraw scrollbars/selection, grayscale line art)
 fonts/                               self-hosted STIX Two + Commit Mono .woff2 files + SHA256SUMS
 scripts/sync-fonts.sh                fetches and verifies upstream .woff2 fonts
+scripts/check-monochrome.py          audits the compiled bundle for chromatic colors
 sws.toml                             static-web-server config (no-cache HTML, immutable css/fonts, inline .typ)
 Dockerfile                           $BUILDPLATFORM typst bundle -> FROM scratch + SWS
-justfile                             compile, sync-fonts, serve, dev, watch, build, preview, release
+justfile                             compile, audit, sync-fonts, serve, dev, watch, build, preview, release
 .github/workflows/publish-image.yaml calls bfeitknecht/infra reusable multi-arch build
 infra/                               ready-to-copy manifests for bfeitknecht/infra
 ```
@@ -29,6 +31,7 @@ infra/                               ready-to-copy manifests for bfeitknecht/inf
 
 - `just compile` compiles `site.typ` into `public/` after verifying `fonts/SHA256SUMS`.
 - `just dev` compiles `site.typ -> public/` and serves it on `http://localhost:8080` matching `sws.toml` (`404.html` + inline `text/plain; charset=utf-8` `.typ` sources).
+- `just audit` asserts the compiled bundle is hue-free — every `hex`/`rgb`/`hsl`/`oklch`/`oklab` literal must resolve to $R = G = B$ (exit code 1 otherwise).
 - `just serve` runs Typst's built-in live-reloading `typst watch --features html,bundle -f bundle` server.
 - `just watch posts/impli.typ` opens a live paged preview while editing a post.
 - `just build` / `just preview` builds and runs `ghcr.io/bfeitknecht/glob:dev` (`http://glob-preview.orb.local:8080` on OrbStack).

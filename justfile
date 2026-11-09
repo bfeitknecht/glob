@@ -17,6 +17,10 @@ sync-fonts:
 serve port="8080":
     typst watch --features html,bundle --format bundle --port "{{port}}" site.typ public
 
+# Assert the compiled bundle is hue-free (every color resolves to R = G = B)
+audit dir="public":
+    python3 scripts/check-monochrome.py "{{dir}}"
+
 # Compile and serve public/ straight from disk matching static-web-server (`sws.toml` .typ headers + 404.html)
 dev: compile
     #!/usr/bin/env python3

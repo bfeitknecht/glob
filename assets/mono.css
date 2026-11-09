@@ -1,0 +1,44 @@
+/* glob — hue-free guardrails layered over `@preview/thyme`'s blog stylesheet.
+   Linked *after* the content-hashed `css/style.css`, so these unlayered rules win
+   over the `@layer components` sheet that `zebraw` inlines for code blocks.
+
+   Every value below resolves through the achromatic palette tokens (`--bg`,
+   `--fg`, `--muted`, `--line`, `--surface-1`, `--surface-2`), which `site.typ`
+   pins to `oklch(L 0 0)`. No rule here can introduce hue. */
+
+/* 1. `zebraw` (Expressive Code) sets the fills it derives from the theme inline,
+      but leaves a handful of color custom properties to
+      `var(--ec-*, <chromatic fallback>)`. Point them at theme tokens so none of
+      the vendored slate-blue / sky-blue / navy defaults can ever surface — most
+      visibly the scrollbar thumb and the code-block selection. */
+.expressive-code {
+  --ec-borderCol: var(--line);
+  --ec-focusBorder: var(--fg);
+  --ec-codeSelBg: var(--surface-2);
+  --ec-uiSelBg: var(--surface-2);
+  --ec-uiSelFg: var(--fg);
+  --ec-indentGuideCol: var(--line);
+  --ec-scrollbarThumbCol: var(--line);
+  --ec-scrollbarThumbHoverCol: var(--muted);
+}
+
+/* 2. thyme inverts line-art diagrams in dark mode with
+      `invert(0.92) hue-rotate(180deg)`; rotating the hue of a coloured SVG keeps
+      it coloured. Grayscale instead (in both schemes) so embedded artwork can
+      never add hue to the page. */
+.blog-diagram svg {
+  filter: grayscale(1);
+}
+
+@media (prefers-color-scheme: dark) {
+  .blog-diagram:not([data-invert="false"]) svg {
+    filter: grayscale(1) invert(0.92);
+  }
+}
+
+/* 3. Controls the browser paints itself (checkbox, radio, range, progress — e.g.
+      the hidden radios behind the zero-JS language switcher) default to the
+      platform accent, which is blue. Let them follow the text token instead. */
+:root {
+  accent-color: var(--fg);
+}
