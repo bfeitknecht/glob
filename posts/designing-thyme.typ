@@ -88,7 +88,7 @@ One more problem occurred only in the paged PDF output (`just watch posts/impli.
 = Build Results and Session Time <numbers>
 
 #recipe[Measurements][
-  The compile times below are measurements from the sandbox#sidenote[The total time is the sum of the generation time of all agent answers in this session. The compile times and the module counts are direct measurements.]. The session time is the total of all agent answers:
+  The table gives the measured values#sidenote[The total is the sum of the generation time of all agent answers in this session. The compile times and the module counts are direct measurements.]. The complete session took 31 minutes and 11 seconds of answer generation.
 
   #grid-table[
     | *Metric* | *Value* | *Notes* |
