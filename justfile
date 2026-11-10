@@ -1,7 +1,7 @@
-# Build, fonts, preview, and release — every command this repository has.
+# The commands for this repository.
 
-# Pinned upstream font versions. Bump them here; `check --fonts` fetches whatever this
-# names and rewrites fonts/VERSIONS + fonts/SHA256SUMS.
+# Pinned font versions. To update the fonts, change these two values.
+# `just check --fonts` downloads them and writes fonts/VERSIONS and fonts/SHA256SUMS.
 stix_version := "v2.13b171"
 commit_mono_version := "1.143"
 
@@ -9,16 +9,16 @@ commit_mono_version := "1.143"
 default:
     @just --list
 
-# Compile site.typ into public/ (fonts are verified first, fetched when stale)
+# Compile site.typ into public/. The fonts are checked first.
 compile: (check "--fonts")
     rm -rf public
     typst compile --features html,bundle --format bundle site.typ public
 
-# Verify the repository; `--fonts` limits it to fonts/SHA256SUMS (and heals them)
+# Check the repository. `--fonts` checks and updates the fonts only.
 check *flags:
     #!/usr/bin/env sh
-    # `just` interpolates recipe arguments here rather than passing them on the command
-    # line, so the flag list comes in as plain space-separated text.
+    # `just` writes the recipe arguments here as text. It does not send them on the command
+    # line. Separate the flags with spaces.
     set -eu
 
     flags="{{ flags }}"
@@ -34,24 +34,24 @@ check *flags:
     if [ "${fonts}" = true ]; then
         echo "==> fonts"
         if ( cd fonts && sha256sum -c SHA256SUMS >/dev/null 2>&1 ); then
-            echo "fonts match fonts/SHA256SUMS"
+            echo "fonts agree with fonts/SHA256SUMS"
         else
-            echo "fonts do not match fonts/SHA256SUMS — fetching {{ stix_version }} / {{ commit_mono_version }}"
+            echo "fonts do not agree with fonts/SHA256SUMS. Downloading {{ stix_version }} and {{ commit_mono_version }}"
             just fetch-fonts
         fi
     fi
 
-# Format the justfile — `just fmt --check` verifies without writing
+# Write the justfile in the standard form. `just fmt --check` only checks it.
 fmt *args:
     @just --fmt {{ args }}
 
-# Fetch the pinned fonts and rewrite fonts/VERSIONS + fonts/SHA256SUMS (used by `check`)
+# Download the pinned fonts and write fonts/VERSIONS and fonts/SHA256SUMS. `check` calls it.
 [private]
 fetch-fonts:
     #!/usr/bin/env sh
-    # Both fonts come from their canonical upstream releases, never from a CDN subsetter
-    # that strips `smcp`, `c2sc`, `onum`, or `MATH`. STIX Two ships .woff2; Commit Mono
-    # ships .otf only, so it is converted with `woff2_compress` when available, else with
+    # Use the upstream releases. A CDN subset removes the `smcp`, `c2sc`, `onum`, and
+    # `MATH` tables. STIX Two has `.woff2` files. Commit Mono has only `.otf` files, so the
+    # recipe converts them with `woff2_compress` if that program is available, or with
     # fontTools (`pip install fonttools brotli`).
     set -eu
 
@@ -102,8 +102,8 @@ fetch-fonts:
     PY
     fi
 
-    # Guard against a silently subsetted download: these tables are the whole reason the
-    # fonts are self-hosted instead of pulled from Google Fonts.
+    # Stop if a download is a subset. These tables are the reason to host the fonts here
+    # and not get them from Google Fonts.
     if python3 -c "import fontTools, brotli" >/dev/null 2>&1; then
         python3 - "${font_dir}" <<'PY'
     import glob, os, sys
@@ -131,11 +131,11 @@ fetch-fonts:
     ( cd "${font_dir}" && LC_ALL=C sha256sum *.woff2 > SHA256SUMS && sha256sum -c SHA256SUMS >/dev/null )
     echo "==> wrote ${font_dir}/VERSIONS and ${font_dir}/SHA256SUMS"
 
-# Live-reloading bundle server (typst watch)
+# Serve the bundle with live reload (typst watch)
 serve port="8080":
     typst watch --features html,bundle --format bundle --port "{{ port }}" site.typ public
 
-# Live paged preview of one post while writing
+# Show a paged preview of one post while you write
 watch target="site.typ":
     typst watch "{{ target }}"
 
@@ -145,17 +145,17 @@ image:
 
 # Run the image built by `just image`
 run:
-    # OrbStack: the published-port proxy is unreliable for scratch images, so use the
-    # container DNS name instead. Plain Docker/Linux: http://localhost:8080.
+    # OrbStack: the port proxy does not work for scratch images. Use the container DNS
+    # name. Docker and Linux: http://localhost:8080.
     docker rm -f glob-preview >/dev/null 2>&1 || true
     docker run -d --rm --name glob-preview -p 8080:8080 ghcr.io/bfeitknecht/glob:dev
     @echo "→ http://glob-preview.orb.local:8080 (OrbStack) or http://localhost:8080 (Linux)"
 
-# Commit, create the annotated `v*` tag, and push — the tag publishes the image
+# Commit, tag with `v*`, and push. The tag starts the image build.
 release $tag="" $message="":
     #!/usr/bin/env sh
-    # Stages everything first, so a clean tree just tags HEAD. A missing TAG or MESSAGE is
-    # prompted for.
+    # The recipe stages all files first. If the tree is clean, it only tags HEAD. If TAG or
+    # MESSAGE is empty, the recipe asks for it.
     set -eu
 
     tag="${tag:-}"

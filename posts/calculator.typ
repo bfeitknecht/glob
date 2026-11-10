@@ -1,7 +1,7 @@
 #import "@preview/thyme:0.1.0": *
 #import blog: *
 
-// Draft — not mounted in `site.typ` yet.
+// Draft. This post is not in `site.typ` yet.
 #show: post.with(
   title: [calc is short for calculator],
   subtitle: [A challenge: make a calculator with no AI help at all],
