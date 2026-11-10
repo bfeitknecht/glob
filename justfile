@@ -1,15 +1,20 @@
 # Build, fonts, preview, and release — every command this repository has.
 
+# Pinned upstream font versions. Bump them here; `check --fonts` fetches whatever this
+# names and rewrites fonts/VERSIONS + fonts/SHA256SUMS.
+stix_version := "v2.13b171"
+commit_mono_version := "1.143"
+
 # List the recipes
 default:
     @just --list
 
-# Compile site.typ into public/ (verifies fonts/SHA256SUMS first)
+# Compile site.typ into public/ (fonts are verified first, fetched when stale)
 compile: (check "--fonts")
     rm -rf public
     typst compile --features html,bundle --format bundle site.typ public
 
-# Verify the repository — `just check --fonts` limits it to fonts/SHA256SUMS
+# Verify the repository; `--fonts` limits it to fonts/SHA256SUMS (and heals them)
 check *flags:
     #!/usr/bin/env sh
     # `just` interpolates recipe arguments here rather than passing them on the command
@@ -27,16 +32,22 @@ check *flags:
     done
 
     if [ "${fonts}" = true ]; then
-        echo "==> fonts/SHA256SUMS"
-        ( cd fonts && sha256sum -c SHA256SUMS )
+        echo "==> fonts"
+        if ( cd fonts && sha256sum -c SHA256SUMS >/dev/null 2>&1 ); then
+            echo "fonts match fonts/SHA256SUMS"
+        else
+            echo "fonts do not match fonts/SHA256SUMS — fetching {{ stix_version }} / {{ commit_mono_version }}"
+            just fetch-fonts
+        fi
     fi
 
 # Format the justfile — `just fmt --check` verifies without writing
 fmt *args:
     @just --fmt {{ args }}
 
-# Re-fetch the upstream fonts and rewrite fonts/VERSIONS + fonts/SHA256SUMS
-sync-fonts stix="v2.13b171" commit-mono="1.143":
+# Fetch the pinned fonts and rewrite fonts/VERSIONS + fonts/SHA256SUMS (used by `check`)
+[private]
+fetch-fonts:
     #!/usr/bin/env sh
     # Both fonts come from their canonical upstream releases, never from a CDN subsetter
     # that strips `smcp`, `c2sc`, `onum`, or `MATH`. STIX Two ships .woff2; Commit Mono
@@ -44,8 +55,8 @@ sync-fonts stix="v2.13b171" commit-mono="1.143":
     # fontTools (`pip install fonttools brotli`).
     set -eu
 
-    stix="{{ stix }}"
-    commit_mono="{{ commit-mono }}"
+    stix="{{ stix_version }}"
+    commit_mono="{{ commit_mono_version }}"
     font_dir="fonts"
     tmp_dir="$(mktemp -d)"
     trap 'rm -rf "${tmp_dir}"' EXIT
@@ -117,7 +128,7 @@ sync-fonts stix="v2.13b171" commit-mono="1.143":
     FONT_CACHE_TAG=${stix#v}-${commit_mono}
     EOF
 
-    ( cd "${font_dir}" && LC_ALL=C sha256sum *.woff2 > SHA256SUMS )
+    ( cd "${font_dir}" && LC_ALL=C sha256sum *.woff2 > SHA256SUMS && sha256sum -c SHA256SUMS >/dev/null )
     echo "==> wrote ${font_dir}/VERSIONS and ${font_dir}/SHA256SUMS"
 
 # Live-reloading bundle server (typst watch)
@@ -128,12 +139,12 @@ serve port="8080":
 watch target="site.typ":
     typst watch "{{ target }}"
 
-# Build the production image locally
-build:
+# Build the container image locally
+image:
     docker build -t ghcr.io/bfeitknecht/glob:dev .
 
-# Run the image built by `just build`
-preview:
+# Run the image built by `just image`
+run:
     # OrbStack: the published-port proxy is unreliable for scratch images, so use the
     # container DNS name instead. Plain Docker/Linux: http://localhost:8080.
     docker rm -f glob-preview >/dev/null 2>&1 || true
