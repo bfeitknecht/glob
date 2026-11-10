@@ -97,11 +97,11 @@ The last audit found three defects. None of them was a compile error. A browser 
   | The first heading had the id `posts-2` | The duplicate check used `before()`, and `before()` counts the current heading | The check reads only the headings above the current one. A real duplicate still gets a suffix |
 ]
 
-The quoted descriptors caused the largest damage. A browser drops an invalid descriptor and keeps the family name. Thus all text used the same face for each weight and each style. The font stacks were correct. The `.woff2` files were correct. Only the CSS was wrong.
+The quoted descriptors caused the most visible problem. A browser drops an invalid descriptor and keeps the family name. Thus all text used the same face for each weight and each style. The font stacks and the `.woff2` files were correct. The CSS was wrong.
 
-The palette needs exact values because the design notes give hex codes. `oklch(96% 0 0)` is `#f2f2f2`, but the same token with a long decimal is a different hex code that nobody can compute in the head. The new helper `css-hex` writes any colour as a `#rrggbb` value, for the places that do not take `oklch()`. The `<meta name="theme-color">` tag uses it, so the browser toolbar colour follows the palette: `#f2f2f2` in light mode and `#0f0f0f` in dark mode.
+The palette needs exact values because the design notes give hex codes. `oklch(96% 0 0)` is `#f2f2f2`, but the same token with a long decimal is a different hex code that a reader cannot calculate mentally. The new helper `css-hex` writes any colour as a `#rrggbb` value, for the places that do not take `oklch()`. The `<meta name="theme-color">` tag uses it, so the browser toolbar colour follows the palette: `#f2f2f2` in light mode and `#0f0f0f` in dark mode.
 
-The heading ids were the quietest defect. The table of contents used the same wrong id as the heading, so every inner link worked and no check failed. But the anchors were not stable between pages. A reader who copied a fragment got a number that was not in the text.
+The heading id defect was the most difficult to find. The table of contents used the same wrong id as the heading, so every inner link worked and no check failed. But the anchors were not stable between pages. A reader who copied a fragment got a number that was not in the text.
 
 = Build Results and Session Time <numbers>
 

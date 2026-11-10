@@ -1,10 +1,11 @@
-# static-web-server config — only what ENV cannot express.
+# static-web-server config. These are the settings that the ENV cannot set.
 #
-# 1. Cache-Control: no-cache on HTML/XML/plain documents (revalidate via Last-Modified -> 304).
-# 2. Immutable 1-year caching on content-addressed `css/**` (`style.css?v=<fnv1a>`) and
-#    version-tagged self-hosted web fonts `fonts/**` (`*.woff2?v=<tag>`).
-# 3. Inline UTF-8 text/plain + nosniff headers on co-emitted Tadi Web `.typ` source files so
-#    clicking `.typ` renders the raw Typst source directly in the browser tab without MIME sniffing.
+# 1. Cache-Control: no-cache for HTML, XML, and plain documents. The browser asks the server
+#    again, and the server answers 304 when the file has not changed.
+# 2. A one-year cache for `css/**` (`style.css?v=<fnv1a>`) and for `fonts/**`
+#    (`*.woff2?v=<tag>`). The URL changes when the file changes.
+# 3. UTF-8 text/plain and nosniff headers for the co-emitted Tadi Web `.typ` files. When a
+#    reader opens a `.typ` file, the browser shows the raw Typst source. No MIME sniffing occurs.
 [advanced]
 
 [[advanced.headers]]

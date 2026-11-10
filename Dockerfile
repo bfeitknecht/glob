@@ -1,7 +1,7 @@
-# Stage 1: Compile the Typst HTML bundle on the host build platform (native speed,
-# zero QEMU emulation overhead during multi-arch linux/amd64,linux/arm64 CI builds).
-# Pinned STIX Two + Commit Mono .otf fonts live only in /fonts during Stage 1 so
-# inline SVG diagrams shape with exact glyph metrics while Stage 2 (`FROM scratch`) stays compact.
+# Stage 1: build the Typst bundle for the host platform. A native build is faster than
+# QEMU emulation for the multi-arch linux/amd64,linux/arm64 CI builds.
+# The .otf files of STIX Two and Commit Mono are in /fonts for Stage 1 only. They give the
+# inline SVG diagrams exact glyph metrics. Stage 2 (`FROM scratch`) stays small.
 FROM --platform=$BUILDPLATFORM alpine:3.21 AS builder
 ARG BUILDARCH
 ARG TYPST_VERSION=0.15.1
@@ -27,13 +27,13 @@ RUN apk add --no-cache ca-certificates curl unzip xz && \
 WORKDIR /build
 COPY . .
 
-# Verify the self-hosted web fonts against `fonts/SHA256SUMS`, then compile `/public`.
-# `@preview/thyme:0.1.0` and `@preview/exemel:0.3.0` come from Typst Universe.
+# Check the web fonts against `fonts/SHA256SUMS`. Then compile `/public`.
+# Typst gets `@preview/thyme:0.1.0` and `@preview/exemel:0.3.0` from Typst Universe.
 RUN cd fonts && sha256sum -c SHA256SUMS && cd .. && \
     typst compile --font-path /fonts --features html,bundle --format bundle site.typ /public
 
-# Stage 2: static-web-server (Rust, ~4 MB, musl-static, no runtime dependencies)
-# copied into an empty filesystem — same pattern as bfeitknecht/apex.
+# Stage 2: static-web-server (Rust, about 4 MB, static, no runtime dependencies). It goes
+# into an empty filesystem. This is the same pattern as bfeitknecht/apex.
 FROM joseluisq/static-web-server:2.44.1-alpine AS sws
 
 FROM scratch
@@ -42,9 +42,9 @@ COPY --from=sws /usr/local/bin/static-web-server /static-web-server
 COPY --from=builder /public /public
 COPY sws.toml /sws.toml
 
-# sws.toml sets Cache-Control: no-cache (immutable on content-hashed css/** and fonts/**)
-# + inline nosniff text/plain headers for `**/*.typ`.
-# SERVER_ERROR_PAGE_404 is relative, so it resolves under SERVER_ROOT (/public/404.html).
+# sws.toml sets Cache-Control: no-cache for HTML and XML, a long cache time for `css/**`
+# and `fonts/**`, and text/plain and nosniff headers for `**/*.typ`.
+# SERVER_ERROR_PAGE_404 is a relative path, so it points to /public/404.html.
 ENV SERVER_HOST=0.0.0.0 \
     SERVER_PORT=8080 \
     SERVER_ROOT=/public \
@@ -53,7 +53,7 @@ ENV SERVER_HOST=0.0.0.0 \
     SERVER_CONFIG_FILE=/sws.toml \
     SERVER_LOG_LEVEL=info
 
-# Nothing is ever written: the Deployment's readOnlyRootFilesystem holds.
+# The container writes no files. The Deployment uses readOnlyRootFilesystem.
 USER 1000:1000
 EXPOSE 8080
 ENTRYPOINT ["/static-web-server"]
