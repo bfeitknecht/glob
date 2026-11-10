@@ -5,14 +5,35 @@ default:
     @just --list
 
 # Compile site.typ into public/ (verifies fonts/SHA256SUMS first)
-compile: fonts-check
+compile: (check "--fonts")
     rm -rf public
     typst compile --features html,bundle --format bundle site.typ public
 
-# Verify fonts/*.woff2 against fonts/SHA256SUMS
-[private]
-fonts-check:
-    @cd fonts && sha256sum -c SHA256SUMS
+# Verify the repository — `just check --fonts` limits it to fonts/SHA256SUMS
+check *flags:
+    #!/usr/bin/env sh
+    # `just` interpolates recipe arguments here rather than passing them on the command
+    # line, so the flag list comes in as plain space-separated text.
+    set -eu
+
+    flags="{{ flags }}"
+    fonts=false
+    [ -n "${flags}" ] || fonts=true
+    for flag in ${flags}; do
+        case "${flag}" in
+            --fonts) fonts=true ;;
+            *) echo "check: unknown flag '${flag}' (known: --fonts)" >&2; exit 1 ;;
+        esac
+    done
+
+    if [ "${fonts}" = true ]; then
+        echo "==> fonts/SHA256SUMS"
+        ( cd fonts && sha256sum -c SHA256SUMS )
+    fi
+
+# Format the justfile — `just fmt --check` verifies without writing
+fmt *args:
+    @just --fmt {{ args }}
 
 # Re-fetch the upstream fonts and rewrite fonts/VERSIONS + fonts/SHA256SUMS
 sync-fonts stix="v2.13b171" commit-mono="1.143":
@@ -102,59 +123,6 @@ sync-fonts stix="v2.13b171" commit-mono="1.143":
 # Live-reloading bundle server (typst watch)
 serve port="8080":
     typst watch --features html,bundle --format bundle --port "{{ port }}" site.typ public
-
-# Compile, then serve public/ with production's `sws.toml` headers
-dev: compile
-    #!/usr/bin/env python3
-    """Static preview of public/ that mirrors static-web-server."""
-    import functools
-    import http.server
-    import pathlib
-
-    root = pathlib.Path("public").resolve()
-    if not root.is_dir():
-        raise SystemExit("no public/ — run `just compile` first")
-    not_found = root / "404.html"
-
-    class Handler(http.server.SimpleHTTPRequestHandler):
-        extensions_map = {
-            **http.server.SimpleHTTPRequestHandler.extensions_map,
-            ".typ": "text/plain; charset=utf-8",
-            ".xml": "application/xml; charset=utf-8",
-            ".woff2": "font/woff2",
-        }
-
-        def end_headers(self):
-            clean = self.path.split("?", 1)[0]
-            immutable = clean.startswith(("/css/", "/fonts/"))
-            self.send_header(
-                "Cache-Control",
-                "public, max-age=31536000, immutable" if immutable else "no-cache",
-            )
-            if clean.endswith(".typ"):
-                self.send_header("Content-Disposition", "inline")
-                self.send_header("X-Content-Type-Options", "nosniff")
-            super().end_headers()
-
-        def send_error(self, code, message=None, explain=None):
-            if code == 404 and not_found.is_file():
-                body = not_found.read_bytes()
-                self.send_response(404)
-                self.send_header("Content-Type", "text/html; charset=utf-8")
-                self.send_header("Content-Length", str(len(body)))
-                self.end_headers()
-                if self.command != "HEAD":
-                    self.wfile.write(body)
-                return
-            super().send_error(code, message, explain)
-
-    handler = functools.partial(Handler, directory=str(root))
-    with http.server.ThreadingHTTPServer(("", 8080), handler) as httpd:
-        print(f"serving {root} on http://localhost:8080")
-        try:
-            httpd.serve_forever()
-        except KeyboardInterrupt:
-            pass
 
 # Live paged preview of one post while writing
 watch target="site.typ":

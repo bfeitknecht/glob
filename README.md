@@ -36,7 +36,7 @@ posts/                               standalone `.typ` files, or a directory whe
 fonts/                               self-hosted STIX Two + Commit Mono .woff2 files, VERSIONS, SHA256SUMS
 sws.toml                             static-web-server config (no-cache HTML, immutable css/fonts, inline .typ)
 Dockerfile                           $BUILDPLATFORM typst bundle -> FROM scratch + static-web-server
-justfile                             compile, sync-fonts, serve, dev, watch, build, preview, release
+justfile                             compile, check, fmt, sync-fonts, serve, watch, build, preview, release
 .github/workflows/publish-image.yaml multi-arch image build, reusing bfeitknecht/infra
 ```
 
@@ -46,16 +46,21 @@ reachable by URL only and stay out of the index, feeds, sitemap, and tag pages u
 
 ## Local workflow (`just`)
 
-- `just compile` verifies `fonts/SHA256SUMS` and compiles `site.typ` into `public/` as a Bundle.
-  The first run downloads `@preview/thyme:0.1.0`, `@preview/exemel:0.3.0`, `cheq`, `showybox`,
-  `tablem`, `zebraw`, and `marge` into Typst's package cache.
+- `just compile` compiles `site.typ` into `public/` as a Bundle. It depends on
+  `just check --fonts`, so the font checksums are verified on every build. The first run downloads
+  `@preview/thyme:0.1.0`, `@preview/exemel:0.3.0`, `cheq`, `showybox`, `tablem`, `zebraw`, and
+  `marge` into Typst's package cache.
+- `just check` runs the repository checks — today that is `fonts/SHA256SUMS`, and `--fonts` limits
+  it to exactly that. `compile` depends on it, so a bad font never reaches a build.
+- `just fmt` rewrites the `justfile` in canonical form; `just fmt --check` only verifies it.
 - `just sync-fonts` re-fetches the upstream `.woff2` files and rewrites `fonts/VERSIONS` and
   `fonts/SHA256SUMS`. It takes the versions as arguments (`just sync-fonts v2.14 1.144`), needs
   `fontTools` + `brotli` for the Commit Mono `.otf` → `.woff2` step (or `woff2_compress`), and
   refuses to finish if a download came back subsetted (no `smcp`/`c2sc`/`onum`/`MATH`).
-- `just dev` compiles and serves `public/` on `http://localhost:8080`, mirroring `sws.toml`
-  (`404.html`, inline `text/plain; charset=utf-8` for `.typ`, immutable caching for `css/`,`fonts/`).
-- `just serve` runs Typst's own live-reloading bundle server.
+- `just serve` runs Typst's own live-reloading bundle server on `http://localhost:8080`. That is
+  the local preview; the production-only behaviour in `sws.toml` (`.typ` as `text/plain`, immutable
+  caching for `css/` and `fonts/`, the custom `404.html`) comes from the container, via
+  `just build && just preview`.
 - `just watch posts/impli.typ` gives a paged preview while writing a post.
 - `just build` / `just preview` build and run `ghcr.io/bfeitknecht/glob:dev` locally.
 - `just release vX.Y.Z "message"` stages everything, commits, creates the annotated `v*` tag, and
