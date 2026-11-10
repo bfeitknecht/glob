@@ -27,9 +27,9 @@ RUN apk add --no-cache ca-certificates curl unzip xz && \
 WORKDIR /build
 COPY . .
 
-# Verify SHA-256 checksums of self-hosted web fonts in `fonts/` and compile `/public`.
+# Verify the self-hosted web fonts against `fonts/SHA256SUMS`, then compile `/public`.
 # `@preview/thyme:0.1.0` and `@preview/exemel:0.3.0` come from Typst Universe.
-RUN sh ./scripts/sync-fonts.sh --check && \
+RUN cd fonts && sha256sum -c SHA256SUMS && cd .. && \
     typst compile --font-path /fonts --features html,bundle --format bundle site.typ /public
 
 # Stage 2: static-web-server (Rust, ~4 MB, musl-static, no runtime dependencies)

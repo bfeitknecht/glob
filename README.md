@@ -33,8 +33,7 @@ posts/                               standalone `.typ` files, or a directory whe
 ├── diagrams.typ                      draft — not mounted in site.typ
 ├── readings.typ                      draft — not mounted in site.typ
 └── wishlist.typ                      draft — not mounted in site.typ
-fonts/                               self-hosted STIX Two + Commit Mono .woff2 files + SHA256SUMS
-scripts/sync-fonts.sh                fetches and verifies the upstream .woff2 fonts
+fonts/                               self-hosted STIX Two + Commit Mono .woff2 files, VERSIONS, SHA256SUMS
 sws.toml                             static-web-server config (no-cache HTML, immutable css/fonts, inline .typ)
 Dockerfile                           $BUILDPLATFORM typst bundle -> FROM scratch + static-web-server
 justfile                             compile, sync-fonts, serve, dev, watch, build, preview, release
@@ -50,6 +49,10 @@ reachable by URL only and stay out of the index, feeds, sitemap, and tag pages u
 - `just compile` verifies `fonts/SHA256SUMS` and compiles `site.typ` into `public/` as a Bundle.
   The first run downloads `@preview/thyme:0.1.0`, `@preview/exemel:0.3.0`, `cheq`, `showybox`,
   `tablem`, `zebraw`, and `marge` into Typst's package cache.
+- `just sync-fonts` re-fetches the upstream `.woff2` files and rewrites `fonts/VERSIONS` and
+  `fonts/SHA256SUMS`. It takes the versions as arguments (`just sync-fonts v2.14 1.144`), needs
+  `fontTools` + `brotli` for the Commit Mono `.otf` → `.woff2` step (or `woff2_compress`), and
+  refuses to finish if a download came back subsetted (no `smcp`/`c2sc`/`onum`/`MATH`).
 - `just dev` compiles and serves `public/` on `http://localhost:8080`, mirroring `sws.toml`
   (`404.html`, inline `text/plain; charset=utf-8` for `.typ`, immutable caching for `css/`,`fonts/`).
 - `just serve` runs Typst's own live-reloading bundle server.
