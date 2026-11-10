@@ -44,7 +44,7 @@ A custom layout with raw `html.elem("section", attrs: (...), ...)` calls becomes
     complexity: [$O(n^2)$],
     contact: link(<contact>)[contact],
   )
-  ````
+  ````,
 )
 
 Both helpers look up the constructors in `dictionary(html)`. Thus standard elements use the typed `html.*` functions of Typst `0.15.1`. The helpers use `html.elem` only when `data-*`, `aria-*`, or custom attributes are necessary.
