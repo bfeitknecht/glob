@@ -28,9 +28,10 @@ WORKDIR /build
 COPY . .
 
 # Check the web fonts against `fonts/SHA256SUMS`. Then compile `/public`.
-# Typst gets `@preview/thyme:0.1.0` and `@preview/exemel:0.3.0` from Typst Universe.
+# Typst gets `@preview/thyme:0.1.0` and `@preview/syndicate:0.1.0` from Typst Universe.
 RUN cd fonts && sha256sum -c SHA256SUMS && cd .. && \
-    typst compile --font-path /fonts --features html,bundle --format bundle site.typ /public
+    typst compile --font-path /fonts --features html,bundle --format bundle site.typ /public && \
+    test -f /public/llms.txt && test -f /public/robots.txt
 
 # Stage 2: static-web-server (Rust, about 4 MB, static, no runtime dependencies). It goes
 # into an empty filesystem. This is the same pattern as bfeitknecht/apex.

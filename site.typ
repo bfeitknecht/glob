@@ -1,6 +1,14 @@
 #import "@preview/thyme:0.1.0": *
 #import blog: *
 
+// `just check --fonts` writes `fonts/SHA256SUMS`. The bundle gets exactly the files in it.
+#let _font-files = (
+  read("fonts/SHA256SUMS")
+    .split("\n")
+    .map(l => l.split(" ").last())
+    .filter(f => f.ends-with(".woff2"))
+)
+
 #let _font-ver = (
   read("fonts/VERSIONS")
     .split("\n")
@@ -13,8 +21,10 @@
   url: "https://blog.0xbf.ch",
   author: "Basil Feitknecht",
   src: path("site.typ"),
+  robots: path("robots.txt"),
+  llms: path("llms.txt"),
   theme: (font-base: "/fonts/", font-version: _font-ver),
-  assets: default-woff2-files.map(f => (
+  assets: _font-files.map(f => (
     path: "fonts/" + f,
     data: read("fonts/" + f, encoding: none),
   )),
