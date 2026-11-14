@@ -21,39 +21,21 @@ The first version was a single blog template with the name `typica`. It went thr
 
 The first prototype had all parts in the same place. The routing, the feed generation, and the `<head>` metadata were next to the serif typography and the sidenote CSS. This was sufficient for `*glob?`. But a smaller personal site such as #link("https://0xbf.ch")[`0xbf.ch`] could not use the site functions without also using the blog styles.
 
-We divided the package into two layers. The first layer is a core with no typography CSS. Import `@preview/thyme:0.1.0` to get the core functions: `site`, `webpage`, `mount`, `file`, `htm`, `h`, `tr`, `sitemap.xml`, `robots.txt`, `404.html`, and the feeds. The second layer is the `blog` preset. Import it with `#import blog: *` and then use its `site` in place of the core `site`. The preset adds the monochrome `oklch` palette, the _STIX Two_ + _Helvetica Neue_ + _Commit Mono_ font stacks, right-margin sidenotes#sidenote[The bordered theorem, definition, proof, and crosshair table styles come from `spicky` (`github.com/bfeitknecht/spicky`). We adapted them for light mode, dark mode, and two-column print.], `/tags/` pages, and `<dl>` frontmatter.
+We divided the package into two layers. The first layer is a core with no typography CSS. Import `@preview/thyme:0.1.0` to get the core functions: `site`, `webpage`, `mount`, `file`, `tr`, and `robots-txt`. `site` writes `sitemap.xml`, `404.html`, and the feeds. The second layer is the `blog` preset. Import it with `#import blog: *` and then use its `site` in place of the core `site`. The preset adds the monochrome `oklch` palette, the _STIX Two_ + _Helvetica Neue_ + _Commit Mono_ font stacks, right-margin sidenotes#sidenote[The bordered theorem, definition, proof, and crosshair table styles come from `spicky` (`github.com/bfeitknecht/spicky`). We adapted them for light mode, dark mode, and two-column print.], `/tags/` pages, and `<dl>` frontmatter.
 
 We also did not use an external wrapper CLI. Other Typst site tools start a second program to scan directories and to serve the site. But `typst watch --features html,bundle -f bundle site.typ public` already watches the imports and serves live-reloaded HTML. The complete site graph stays in `site.typ`. Thus the site needs no extra tool to install or to maintain.
 
 = Typed HTML and Plain-Text Sources <core-api>
 
-A custom layout with raw `html.elem("section", attrs: (...), ...)` calls becomes difficult to read. To make custom pages easy to write, `src/htm.typ` has two small helpers. They are based on Jason Miller's `developit/htm` and on Mithril's hyperscript. `htm` reads raw HTML strings with `{slot}` placeholders. It also checks the HTML5 tag balance at compile time. `h("section#projects.entries", ...)` builds elements from CSS selector shorthand#sidenote[If `h` receives a `length` or a `fraction` such as `#h(1fr)`, it sends the call to `std.h`. Thus an import of `thyme` never hides the horizontal spacing of Typst.].
+A custom layout with raw `html.elem("section", attrs: (class: "note"), body)` calls is difficult to read. The first versions of the package had two helpers for this. `htm` read an HTML string with `{slot}` placeholders and checked the tag balance at compile time. `h` built elements from CSS selector shorthand, in the style of Mithril. Both helpers looked up the constructors in `dictionary(html)`, so standard elements used the typed `html.*` functions, and they fell back to `html.elem` only for `data-*`, `aria-*`, and custom attributes.
 
-#zebraw(
-  highlight-lines: (2, 8),
-  ````typst
-  #htm(
-    ```html
-    <header>
-      <p class="eyebrow">{greeting}</p>
-      <h1>Ada Lovelace</h1>
-      <p>Recurrence schedules in {complexity} · {contact}</p>
-    </header>
-    ```,
-    greeting: tr(en: [Symbolic Computation], de: [Symbolische Berechnung]),
-    complexity: [$O(n^2)$],
-    contact: link(<contact>)[contact],
-  )
-  ````,
-)
-
-Both helpers look up the constructors in `dictionary(html)`. Thus standard elements use the typed `html.*` functions of Typst `0.15.1`. The helpers use `html.elem` only when `data-*`, `aria-*`, or custom attributes are necessary.
+We removed both helpers before `0.1.0`. Typst `0.15.1` already has the typed `html.*` constructors, and a second builder is an opinion with a parser to maintain. A site now writes `html.elem(...)` when content cannot express what it needs.
 
 The plain-text `.typ` sources beside each HTML page caused a problem with the Typst package sandbox. Inside `@preview/thyme`, a string path is relative to the package directory, not to the directory of the user. Thus a library function cannot read `posts/impli.typ` by its string name. The `path(...)` type in Typst `0.15` keeps the read capability across package boundaries. The library accepts `src: path("site.typ")` and `#post(path("posts/impli.typ"))`. Then `thyme` reads the file and writes its raw bytes to the same URL tree (`/site.typ`, `/posts/impli.typ`). The `.typ` link in the top bar opens these files.
 
-For the XML sitemap and the feeds, we extended `@preview/exemel` to `0.3.0`. It now has `sitemap-encode` and `rss-encode` in addition to `atom-encode`. We also added an optional serializer to `thyme` (`feed-content: "full"`). It converts the post content into semantic HTML for feed readers.
+For the XML sitemap and the feeds, we wrote `@preview/syndicate:0.1.0`. It has `sitemap`, `atom`, and `rss` modules, and each function returns a complete XML document. `thyme` also has an optional serializer (`feed-content: "full"`). It converts the post content into semantic HTML for feed readers.
 
-The language switch also needed two revisions. The site does not make separate `/en/` and `/de/` URL trees and does not send JavaScript. `#tr(en: [...], de: [...])` emits hidden radio inputs. CSS toggles them with `:root:has(#thyme-lang-de:checked)`. Each branch sets `text.lang`, so the smart quotes and the hyphenation agree with the language. Two bugs appeared early. A blog with one language must not show an `en` widget. And `<title>`, the word counts, and the RSS feeds must not contain hidden spans from the other language. We limited the `<thyme-tr-meta>` queries to each bundle document. Thus a page with one language has no toggle. We also changed `to-plain-text` and `count-words` to read only the primary language branch before they give strings to `exemel`.
+The language switch also needed two revisions. The site does not make separate `/en/` and `/de/` URL trees and does not send JavaScript. `#tr(en: [...], de: [...])` emits hidden radio inputs. CSS toggles them with `:root:has(#thyme-lang-de:checked)`. Each branch sets `text.lang`, so the smart quotes and the hyphenation agree with the language. Two bugs appeared early. A blog with one language must not show an `en` widget. And `<title>`, the word counts, and the RSS feeds must not contain hidden spans from the other language. We limited the `<thyme-tr-meta>` queries to each bundle document. Thus a page with one language has no toggle. We also changed `to-plain-text` and `count-words` to read only the primary language branch before they give strings to `syndicate`.
 
 = Math, Fonts, and Sidenotes <typography>
 

@@ -1,0 +1,27 @@
+# glob
+
+> Notes on programming languages, formal methods, computer systems, and side projects, by Basil Feitknecht.
+
+The site is written in Typst and compiled to HTML. Every page has a `.typ` source next to its
+HTML twin, and the server sends that source as `text/plain`. Replace the trailing slash of a page
+URL with `.typ` to read the markup that made it. The pages send plain HTML and CSS, with no
+framework and no analytics.
+
+## Posts
+
+- [Designing `thyme`](https://blog.0xbf.ch/posts/designing-thyme/): How one Typst blog template became a static site library with a monochrome blog preset. Covers typed HTML, plain-text sources, CSS language switching without JavaScript, and the font and MathML problems in browsers.
+- [New Rabbit Holes Await](https://blog.0xbf.ch/posts/rabbit-holes/): The projects after `impli`: declarative Nix systems, a self-hosted Kubernetes cluster, Typst HTML output, and new languages.
+- [Feitk's List](https://blog.0xbf.ch/posts/list/): Twenty-one projects for the computer science generalist, as a counterpart to Robert A. Heinlein's list.
+- [SVG runs GOL with JS](https://blog.0xbf.ch/posts/gol/): A 60x30 Conway's Game of Life inside one SVG file, driven by `<script>` and `<foreignObject>`.
+- [Try Some Trigraphs!](https://blog.0xbf.ch/posts/trigraphs/): How a C trigraph turns a one-line comment into an escaped newline that swallows the next statement.
+- [Yak Shaving Utensils & Co.](https://blog.0xbf.ch/posts/yak-shaving/): A field guide to modern CLI replacements, Nushell, terminal multiplexers, and macOS tools.
+- [`impli`, My Beloved](https://blog.0xbf.ch/posts/impli/): Seven months of Haskell, small-step operational semantics, WASI `stdin` problems, and an `IMP` interpreter that runs in the browser through GHC WebAssembly.
+
+## Optional
+
+- [Homepage](https://blog.0xbf.ch/): The index page, with the same posts in reverse date order.
+- [Tags](https://blog.0xbf.ch/tags/): Archive pages for every tag.
+- [Atom feed](https://blog.0xbf.ch/atom.xml) and [RSS feed](https://blog.0xbf.ch/rss.xml): The posts, newest first, with a summary of each.
+- [Sitemap](https://blog.0xbf.ch/sitemap.xml): Every URL in the bundle.
+- [0xbf.ch](https://0xbf.ch): The author's main site.
+- [thyme](https://github.com/bfeitknecht/thyme) and [syndicate](https://github.com/bfeitknecht/syndicate): The two Typst packages that build this site and its XML.

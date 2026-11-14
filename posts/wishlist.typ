@@ -1,5 +1,6 @@
 #import "@preview/thyme:0.1.0": *
 #import blog: *
+#import "@preview/cheq:0.4.0": checklist
 
 // Draft. This post is not in `site.typ` yet.
 #show: post.with(
