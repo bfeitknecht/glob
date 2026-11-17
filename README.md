@@ -42,6 +42,7 @@ sws.toml                             static-web-server config (no-cache HTML, lo
 Dockerfile                           $BUILDPLATFORM typst bundle -> FROM scratch + static-web-server
 justfile                             compile, check, fmt, serve, watch, image, run, release
 VERSION                              release version (X.Y.Z); `just release` tags v<VERSION>
+favicon.svg                          the ^@ mark, copied from apex (ssg/assets/favicon.svg)
 .github/workflows/publish-image.yaml multi-arch image build, using bfeitknecht/infra
 ```
 

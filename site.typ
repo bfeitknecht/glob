@@ -21,6 +21,8 @@
   url: "https://blog.0xbf.ch",
   author: "Basil Feitknecht",
   src: path("site.typ"),
+  // The mark from apex (ssg/favicon.typ there). Copy it again when it changes.
+  favicon: path("favicon.svg"),
   robots: path("robots.txt"),
   llms: path("llms.txt"),
   theme: (font-base: "/fonts/", font-version: _font-ver),
