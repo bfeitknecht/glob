@@ -41,6 +41,7 @@ robots.txt                           crawler rules, copied into the bundle root
 sws.toml                             static-web-server config (no-cache HTML, long cache for css/fonts, inline .typ)
 Dockerfile                           $BUILDPLATFORM typst bundle -> FROM scratch + static-web-server
 justfile                             compile, check, fmt, serve, watch, image, run, release
+VERSION                              release version (X.Y.Z); `just release` tags v<VERSION>
 .github/workflows/publish-image.yaml multi-arch image build, using bfeitknecht/infra
 ```
 
@@ -73,8 +74,9 @@ the files in this repository. Edit them here. `site.typ` points at both with `ro
 - `just image` builds the container image locally, with the tag `ghcr.io/bfeitknecht/glob:dev`.
   `just run` starts that image on port 8080. Use these two commands to test the `sws.toml` headers
   before a deploy.
-- `just release vX.Y.Z "message"` stages all files, commits, makes the annotated `v*` tag, and
-  pushes. The tag starts the image build. See [Deploy](#deploy).
+- `just release` reads `VERSION`, makes the annotated `v<VERSION>` tag, and pushes it. It never
+  commits: the tree must be clean and match origin. `just release --check` validates only. The
+  tag starts the image build. See [Deploy](#deploy).
 
 ## Pins
 
@@ -108,7 +110,7 @@ Before a release, run these steps:
 1. `just check` and `just fmt --check` pass.
 2. `just compile` writes `public/` with no error. This confirms that `@preview/thyme:0.1.0` and
    `@preview/syndicate:0.1.0` resolve from Typst Universe.
-3. `just release v0.1.0 "Release 0.1.0"` makes the tag and pushes it.
+3. Bump `VERSION`, commit and push. `just release` makes the tag and pushes it.
 
 The cluster manifests (namespace, pull secret, Flux `Kustomization`, HTTPRoute) are in
 `bfeitknecht/infra`, in `kubernetes/applications/glob/`. This repository has no manifests.

@@ -151,38 +151,23 @@ run:
     docker run -d --rm --name glob-preview -p 8080:8080 ghcr.io/bfeitknecht/glob:dev
     @echo "→ http://glob-preview.orb.local:8080 (OrbStack) or http://localhost:8080 (Linux)"
 
-# Commit, tag with `v*`, and push. The tag starts the image build.
-release $tag="" $message="":
+# Tag `v<VERSION>` and push. `--check` validates only. The tag starts the image build.
+release *flags:
     #!/usr/bin/env sh
-    # The recipe stages all files first. If the tree is clean, it only tags HEAD. If TAG or
-    # MESSAGE is empty, the recipe asks for it.
+    # The recipe never commits. It tags a clean tree that matches origin.
     set -eu
-
-    tag="${tag:-}"
-    message="${message:-}"
-
-    [ -n "$tag" ] || { printf 'release tag: '; read -r tag || tag=""; }
-    [ -n "$message" ] || { printf 'release message: '; read -r message || message=""; }
-    [ -n "$tag" ] || { echo "release: no tag given" >&2; exit 1; }
-    [ -n "$message" ] || { echo "release: no message given" >&2; exit 1; }
-    git check-ref-format "refs/tags/$tag" >/dev/null 2>&1 \
-        || { echo "release: '$tag' is not a valid tag name" >&2; exit 1; }
-    ! git rev-parse -q --verify "refs/tags/$tag" >/dev/null \
-        || { echo "release: tag $tag already exists" >&2; exit 1; }
-    git remote get-url origin >/dev/null 2>&1 \
-        || { echo "release: no 'origin' remote configured" >&2; exit 1; }
-
-    git add -A
-    if ! git diff --cached --quiet; then
-        git commit -m "$message"
-    elif git rev-parse -q --verify HEAD >/dev/null; then
-        echo "release: nothing to commit, tagging HEAD"
-    else
-        echo "release: nothing to commit and no commits yet" >&2
-        exit 1
-    fi
-
-    git tag -a "$tag" -m "$message"
-    git push origin HEAD
-    git push origin "$tag"
-    echo "release: pushed $tag"
+    version="$(tr -d '[:space:]' < VERSION)"
+    tag="v${version}"
+    printf '%s' "${version}" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+$' \
+        || { echo "release: VERSION '${version}' is not X.Y.Z" >&2; exit 1; }
+    ! git rev-parse -q --verify "refs/tags/${tag}" >/dev/null \
+        || { echo "release: tag ${tag} exists; bump VERSION" >&2; exit 1; }
+    [ -z "$(git status --porcelain)" ] || { echo "release: working tree is not clean; commit first" >&2; exit 1; }
+    git fetch -q origin
+    [ "$(git rev-parse HEAD)" = "$(git rev-parse '@{u}')" ] \
+        || { echo "release: HEAD differs from upstream; push or pull first" >&2; exit 1; }
+    just compile
+    case "{{ flags }}" in *--check*) echo "${tag} is ready"; exit 0 ;; esac
+    git tag -a "${tag}" -m "Release ${version}"
+    git push origin "${tag}"
+    echo "release: pushed ${tag}; CI publishes ghcr.io/bfeitknecht/glob"
