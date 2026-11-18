@@ -1,4 +1,4 @@
-#import "@preview/thyme:0.1.0": *
+#import "@preview/thyme:0.1.2": *
 #import blog: *
 
 #show: post.with(
@@ -15,13 +15,13 @@ In @rabbit-holes, Basil wrote the requirements for his blog. He wanted the low f
 
 Typst `0.15.1` has experimental `html` and `bundle` targets. These two targets were sufficient. The complete site builds with one `typst compile` command.
 
-The first version was a single blog template with the name `typica`. It went through eighteen design and audit passes. The result is `@preview/thyme:0.1.0`. This post gives the main design decisions and the problems that we found.
+The first version was a single blog template with the name `typica`. It went through eighteen design and audit passes. The result is `@preview/thyme:0.1.2`. This post gives the main design decisions and the problems that we found.
 
 = From One Template to a Library <layers>
 
 The first prototype had all parts in the same place. The routing, the feed generation, and the `<head>` metadata were next to the serif typography and the sidenote CSS. This was sufficient for `*glob?`. But a smaller personal site such as #link("https://0xbf.ch")[`0xbf.ch`] could not use the site functions without also using the blog styles.
 
-We divided the package into two layers. The first layer is a core with no typography CSS. Import `@preview/thyme:0.1.0` to get the core functions: `site`, `webpage`, `mount`, `file`, `tr`, and `robots-txt`. `site` writes `sitemap.xml`, `404.html`, and the feeds. The second layer is the `blog` preset. Import it with `#import blog: *` and then use its `site` in place of the core `site`. The preset adds the monochrome `oklch` palette, the _STIX Two_ + _Helvetica Neue_ + _Commit Mono_ font stacks, right-margin sidenotes#sidenote[The bordered theorem, definition, proof, and crosshair table styles come from `spicky` (`github.com/bfeitknecht/spicky`). We adapted them for light mode, dark mode, and two-column print.], `/tags/` pages, and `<dl>` frontmatter.
+We divided the package into two layers. The first layer is a core with no typography CSS. Import `@preview/thyme:0.1.2` to get the core functions: `site`, `webpage`, `mount`, `file`, `tr`, and `robots-txt`. `site` writes `sitemap.xml`, `404.html`, and the feeds. The second layer is the `blog` preset. Import it with `#import blog: *` and then use its `site` in place of the core `site`. The preset adds the monochrome `oklch` palette, the _STIX Two_ + _Helvetica Neue_ + _Commit Mono_ font stacks, right-margin sidenotes#sidenote[The bordered theorem, definition, proof, and crosshair table styles come from `spicky` (`github.com/bfeitknecht/spicky`). We adapted them for light mode, dark mode, and two-column print.], `/tags/` pages, and `<dl>` frontmatter.
 
 We also did not use an external wrapper CLI. Other Typst site tools start a second program to scan directories and to serve the site. But `typst watch --features html,bundle -f bundle site.typ public` already watches the imports and serves live-reloaded HTML. The complete site graph stays in `site.typ`. Thus the site needs no extra tool to install or to maintain.
 

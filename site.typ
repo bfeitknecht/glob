@@ -1,19 +1,13 @@
-#import "@preview/thyme:0.1.0": *
+#import "@preview/thyme:0.1.2": *
 #import blog: *
 
 // `just check --fonts` writes `fonts/SHA256SUMS`. The bundle gets exactly the files in it.
 #let _font-files = (
-  read("fonts/SHA256SUMS")
-    .split("\n")
-    .map(l => l.split(" ").last())
-    .filter(f => f.ends-with(".woff2"))
+  read("fonts/SHA256SUMS").split("\n").map(l => l.split(" ").last()).filter(f => f.ends-with(".woff2"))
 )
 
 #let _font-ver = (
-  read("fonts/VERSIONS")
-    .split("\n")
-    .find(l => l.starts-with("FONT_CACHE_TAG="))
-    .trim("FONT_CACHE_TAG=", at: start)
+  read("fonts/VERSIONS").split("\n").find(l => l.starts-with("FONT_CACHE_TAG=")).trim("FONT_CACHE_TAG=", at: start)
 )
 
 #show: site.with(
@@ -21,6 +15,8 @@
   url: "https://blog.0xbf.ch",
   author: "Basil Feitknecht",
   src: path("site.typ"),
+  // Reading-time estimate (`· <n> min`) beside the date on the entry cards.
+  show-reading: true,
   // The mark from apex (ssg/favicon.typ there). Copy it again when it changes.
   favicon: path("favicon.svg"),
   robots: path("robots.txt"),

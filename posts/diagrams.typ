@@ -1,4 +1,4 @@
-#import "@preview/thyme:0.1.0": *
+#import "@preview/thyme:0.1.2": *
 #import blog: *
 
 // Draft. This post is not in `site.typ` yet.
@@ -29,3 +29,5 @@
 = More
 
 // TODO: other important scientific diagrams, graphs, and visualisations that carry weight
+// minutephysics dissonance graph
+// factorial negative continuation

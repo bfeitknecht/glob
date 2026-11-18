@@ -1,9 +1,9 @@
-#import "@preview/thyme:0.1.0": *
+#import "@preview/thyme:0.1.2": *
 #import blog: *
 
 // DRAFT. Not mounted in site.typ. Reachable by URL only after a release.
 #show: post.with(
-  title: [Notes to Agents],
+  title: [AGENTS],
   subtitle: [The rules I give every coding agent in my workspace],
   author: "Basil Feitknecht",
   created: datetime(year: 2026, month: 11, day: 16),
