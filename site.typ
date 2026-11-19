@@ -1,4 +1,4 @@
-#import "@preview/thyme:0.1.2": *
+#import "@preview/thyme:0.1.1": *
 #import blog: *
 
 // `just check --fonts` writes `fonts/SHA256SUMS`. The bundle gets exactly the files in it.
@@ -16,7 +16,6 @@
   author: "Basil Feitknecht",
   src: path("site.typ"),
   // Reading-time estimate (`· <n> min`) beside the date on the entry cards.
-  show-reading: true,
   // The mark from apex (ssg/favicon.typ there). Copy it again when it changes.
   favicon: path("favicon.svg"),
   robots: path("robots.txt"),

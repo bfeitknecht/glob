@@ -1,4 +1,4 @@
-#import "@preview/thyme:0.1.2": *
+#import "@preview/thyme:0.1.1": *
 #import blog: *
 #import "@preview/cheq:0.4.0": checklist
 
