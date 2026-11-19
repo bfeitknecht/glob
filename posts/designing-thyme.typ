@@ -1,4 +1,4 @@
-#import "@preview/thyme:0.1.1": *
+#import "@preview/thyme:0.1.2": *
 #import blog: *
 
 #show: post.with(
@@ -13,7 +13,7 @@
 
 In @rabbit-holes, Basil listed what his blog needs: Markdown-level friction, TeX-grade math without TeX, readable plain-text sources in the spirit of the #link("https://tadiweb.com")[Tadi Web], and no client-side JavaScript.
 
-Typst `0.15.1` has `html` and `bundle` targets. They are enough: the whole site is one `typst compile`. The first template, `typica`, went through eighteen design and audit passes and became `@preview/thyme:0.1.1`.
+Typst `0.15.1` has `html` and `bundle` targets. They are enough: the whole site is one `typst compile`. The first template, `typica`, went through eighteen design and audit passes and became `@preview/thyme:0.1.2`.
 
 = Two layers <layers>
 
