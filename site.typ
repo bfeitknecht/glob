@@ -47,3 +47,8 @@ Notes on programming languages, formal methods, computer systems, and miscellane
 #post(path("posts/trigraphs.typ")) <trigraphs>
 #post(path("posts/yak-shaving.typ")) <yak-shaving>
 #post(path("posts/impli.typ")) <impli>
+
+// Root fallbacks: Safari, iOS and tools ask for these without a <link>.
+// Rendered from favicon.svg (the round mark).
+#file("favicon.ico", path("favicon.ico"))
+#file("apple-touch-icon.png", path("apple-touch-icon.png"))
