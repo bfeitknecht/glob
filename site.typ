@@ -32,12 +32,6 @@
 
 Notes on programming languages, formal methods, computer systems, and miscellaneous rabbit holes.
 
-#links(
-  link("https://0xbf.ch")[0xbf.ch],
-  [@rss[rss]],
-  [@atom[atom]],
-)
-
 == Posts
 
 #post(path("posts/designing-thyme.typ")) <designing-thyme>
@@ -47,6 +41,12 @@ Notes on programming languages, formal methods, computer systems, and miscellane
 #post(path("posts/trigraphs.typ")) <trigraphs>
 #post(path("posts/yak-shaving.typ")) <yak-shaving>
 #post(path("posts/impli.typ")) <impli>
+
+#html.footer(links(
+  link("https://0xbf.ch")[0xbf.ch],
+  [@rss[rss]],
+  [@atom[atom]],
+))
 
 // Root fallbacks: Safari, iOS and tools ask for these without a <link>.
 // Rendered from favicon.svg (the round mark).
