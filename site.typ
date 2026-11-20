@@ -43,15 +43,13 @@ Notes on programming languages, formal methods, computer systems, and miscellane
 #post(path("posts/yak-shaving.typ")) <yak-shaving>
 #post(path("posts/impli.typ")) <impli>
 
-// The same footer as the gallery (footer.css).
-#html.footer(class: "site-footer", {
-  html.a(href: "https://0xbf.ch/")[0xbf.ch]
-  html.nav(class: "footer-nav", aria-label: "Feeds and files", {
-    html.a(href: "sitemap.xml")[sitemap]
-    html.a(href: "rss.xml")[rss]
-    html.a(href: "atom.xml")[atom]
-  })
-})
+// Footer, styled like the gallery's (footer.css).
+#html.footer(links(
+  link("https://0xbf.ch")[0xbf.ch],
+  link("sitemap.xml")[sitemap],
+  [@rss[rss]],
+  [@atom[atom]],
+))
 
 // Root fallbacks: Safari, iOS and tools ask for these without a <link>.
 // Rendered from favicon.svg (the round mark).

@@ -83,11 +83,12 @@ The id bug hid well: the table of contents used the same wrong id, so every link
   #grid-table[
     | *Metric* | *Value* |
     | --- | --- |
-    | Answer generation, whole session#sidenote[Sum of all agent answers; the rest are direct measurements.] | `31 min 11 s` |
+    | Answer generation, whole session | `31 min 11 s` |
     | Design and audit passes | `18` |
     | Full `glob` bundle | `≈ 0.48 s` |
     | Single post | `≈ 75 ms` |
     | `thyme` modules | `16` |
     | Reference manual | `28` pages |
   ]
+  The session time is the sum of all agent answers; the rest are direct measurements.
 ]
