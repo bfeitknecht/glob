@@ -1,4 +1,4 @@
-#import "@preview/thyme:0.1.2": *
+#import "@preview/thyme:0.1.3": *
 #import blog: *
 
 // `just check --fonts` writes `fonts/SHA256SUMS`. The bundle gets exactly the files in it.
@@ -15,11 +15,12 @@
   url: "https://blog.0xbf.ch",
   author: "Basil Feitknecht",
   src: path("site.typ"),
-  // Reading-time estimate (`· <n> min`) beside the date on the entry cards.
+  // Reading time (`<n> min`) beside the title on the entry cards (thyme 0.1.3).
   show-reading: true,
   // The mark from apex (ssg/favicon.typ there). Copy it again when it changes.
   favicon: path("favicon.svg"),
   robots: path("robots.txt"),
+  stylesheets: (path("footer.css"),),
   llms: path("llms.txt"),
   theme: (font-base: "/fonts/", font-version: _font-ver),
   assets: _font-files.map(f => (
@@ -42,11 +43,15 @@ Notes on programming languages, formal methods, computer systems, and miscellane
 #post(path("posts/yak-shaving.typ")) <yak-shaving>
 #post(path("posts/impli.typ")) <impli>
 
-#html.footer(links(
-  link("https://0xbf.ch")[0xbf.ch],
-  [@rss[rss]],
-  [@atom[atom]],
-))
+// The same footer as the gallery (footer.css).
+#html.footer(class: "site-footer", {
+  html.a(href: "https://0xbf.ch/")[0xbf.ch]
+  html.nav(class: "footer-nav", aria-label: "Feeds and files", {
+    html.a(href: "sitemap.xml")[sitemap]
+    html.a(href: "rss.xml")[rss]
+    html.a(href: "atom.xml")[atom]
+  })
+})
 
 // Root fallbacks: Safari, iOS and tools ask for these without a <link>.
 // Rendered from favicon.svg (the round mark).
