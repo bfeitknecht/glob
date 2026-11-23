@@ -1,4 +1,4 @@
-#import "@preview/thyme:0.1.3": *
+#import "@preview/thyme:0.1.4": *
 #import blog: *
 
 // `just check --fonts` writes `fonts/SHA256SUMS`. The bundle gets exactly the files in it.
@@ -12,11 +12,17 @@
 
 #show: site.with(
   description: "Notes on programming languages, formal methods, systems, and sidequests.",
-  url: "https://blog.0xbf.ch",
+  url: "https://blg.0xbf.ch",
   author: "Basil Feitknecht",
   src: path("site.typ"),
   // Reading time (`<n> min`) beside the title on the entry cards (thyme 0.1.3).
   show-reading: true,
+  // Section links in the top bar, like the gallery's (thyme 0.1.4).
+  nav: ("/", "/posts/", "/tags/"),
+  // `/posts/`: every post in one list, newest first.
+  pages: ((slug: "posts", title: [Posts], body: [= Posts
+    #posts()
+  ]),),
   // The mark from apex (ssg/favicon.typ there). Copy it again when it changes.
   favicon: path("favicon.svg"),
   robots: path("robots.txt"),

@@ -1,13 +1,13 @@
 # glob
 
-Personal blog at [blog.0xbf.ch](https://blog.0xbf.ch), written in [Typst](https://typst.app).
+Personal blog at [blg.0xbf.ch](https://blg.0xbf.ch), written in [Typst](https://typst.app).
 
 `site.typ` compiles with Typst `0.15.1` (`--features html,bundle --format bundle`) into one static
 bundle: HTML, MathML, CSS, and the Tadi Web `.typ` sources. The
 [`thyme`](https://github.com/bfeitknecht/thyme) `blog` preset supplies the monochrome theme, the
 typography, the sidenotes, and the feeds. [`syndicate`](https://github.com/bfeitknecht/syndicate)
 writes the XML for the sitemap and the feeds. Both packages come from Typst Universe, as
-`@preview/thyme:0.1.2` and `@preview/syndicate:0.1.0`. The version in each `#import` line is the
+`@preview/thyme:0.1.4` and `@preview/syndicate:0.1.0`. The version in each `#import` line is the
 only dependency setting, and the repository holds no local copy of these packages.
 
 The bundle runs inside a `FROM scratch` `static-web-server` container. It is a tier-2 app on
@@ -58,7 +58,7 @@ the files in this repository. Edit them here. `site.typ` points at both with `ro
 ## Commands
 
 - `just compile` renders `site.typ` into `public/` as a bundle. The first run downloads
-  `@preview/thyme:0.1.2`, `@preview/syndicate:0.1.0`, `cheq`, `showybox`, `tablem`, `zebraw`, and
+  `@preview/thyme:0.1.4`, `@preview/syndicate:0.1.0`, `cheq`, `showybox`, `tablem`, `zebraw`, and
   `marge` into the Typst package cache.
 - `just check` checks the repository. `just check --fonts` checks only the self-hosted fonts, and
   `compile` runs that check before it starts. If a `.woff2` file does not agree with
@@ -110,7 +110,7 @@ the new digest.
 Before a release, run these steps:
 
 1. `just check` and `just fmt --check` pass.
-2. `just compile` writes `public/` with no error. This confirms that `@preview/thyme:0.1.2` and
+2. `just compile` writes `public/` with no error. This confirms that `@preview/thyme:0.1.4` and
    `@preview/syndicate:0.1.0` resolve from Typst Universe.
 3. Bump `VERSION`, commit and push. `just release` makes the tag and pushes it.
 

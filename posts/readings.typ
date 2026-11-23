@@ -1,4 +1,4 @@
-#import "@preview/thyme:0.1.2": *
+#import "@preview/thyme:0.1.4": *
 #import blog: *
 
 // Draft. This post is not in `site.typ` yet.
