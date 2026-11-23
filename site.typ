@@ -1,4 +1,4 @@
-#import "@preview/thyme:0.1.4": *
+#import "@preview/thyme:0.1.5": *
 #import blog: *
 
 // `just check --fonts` writes `fonts/SHA256SUMS`. The bundle gets exactly the files in it.
@@ -26,7 +26,7 @@
   // The mark from apex (ssg/favicon.typ there). Copy it again when it changes.
   favicon: path("favicon.svg"),
   robots: path("robots.txt"),
-  stylesheets: (path("footer.css"),),
+  stylesheets: (path("site.css"),),
   llms: path("llms.txt"),
   theme: (font-base: "/fonts/", font-version: _font-ver),
   assets: _font-files.map(f => (
@@ -49,7 +49,7 @@ Notes on programming languages, formal methods, computer systems, and miscellane
 #post(path("posts/yak-shaving.typ")) <yak-shaving>
 #post(path("posts/impli.typ")) <impli>
 
-// Footer, styled like the gallery's (footer.css).
+// Footer, styled like the gallery's (site.css).
 #html.footer(links(
   link("https://0xbf.ch")[0xbf.ch],
   link("sitemap.xml")[sitemap],

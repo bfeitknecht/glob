@@ -1,0 +1,54 @@
+/* glob on top of thyme's blog preset: the type scale and the chrome of the
+   gallery (exhib static/css/site.css). thyme reads these variables. */
+:root {
+  /* Optically the gallery's Helvetica Neue 500: STIX Two has no 500 (it
+     falls back to Regular), so SemiBold. */
+  --heading-weight: 600;
+  /* The homepage title: as big as the gallery's, a little bigger. */
+  --title-size: clamp(4.4rem, 13vw, 11rem);
+  --title-tracking: -0.06em;
+  /* Page and post titles, entry titles: the gallery's page-intro and card sizes. */
+  --page-title-size: clamp(1.8rem, 4vw, 3.5rem);
+  --entry-title-size: clamp(1.3rem, 2.4vw, 2rem);
+  /* Space under the top bar: the gallery's header. */
+  --topbar-space: clamp(1.75rem, 3vw, 3rem);
+}
+
+/* The homepage title in Commit Mono Bold: as heavy as the gallery's. */
+main.home > h1 > code {
+  font-weight: 700;
+}
+
+main.home > h1 {
+  line-height: 0.85;
+}
+
+/* The line under the title: the gallery's tagline. */
+main.home > h1 + p {
+  /* More than the gallery's .7rem: the g of *glob? has a descender. */
+  margin: 1.4rem 0 0;
+  color: var(--muted);
+  font-size: clamp(1rem, 1.5vw, 1.35rem);
+  line-height: 1.35;
+}
+
+/* The footer looks like the gallery's (exhib .site-footer): the first link on
+   the left, the rest on the right, small mono, no separators. */
+main > footer ul.links {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: .5rem clamp(.7rem, 3vw, 1.5rem);
+  margin: clamp(2rem, 5vw, 4rem) 0 0;
+  padding-block: 0 .25rem;
+  color: var(--muted);
+  font: 400 .75rem/1.4 var(--mono);
+}
+main > footer ul.links li:first-child { margin-right: auto; }
+main > footer ul.links li + li::before { content: none; }
+main > footer ul.links a { color: inherit; text-decoration: none; }
+main > footer ul.links a:hover,
+main > footer ul.links a:focus-visible { color: var(--fg); }
+@media (max-width: 40rem) {
+  main > footer ul.links { margin-top: 2rem; font-size: .72rem; }
+}
