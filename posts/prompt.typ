@@ -15,7 +15,7 @@ A prompt is the one piece of UI I look at more than any other. So naturally, I w
 
 #zebraw(
   ```
-  bf@anti:~/glob     # (main +1*1 ><1/2) 2026-11-24T00:47:08+0100
+  bf@anti:~/glob     # (main +1*1 >1<2) 2026-11-24T00:47:08+0100
   %
   ```,
 )
@@ -57,7 +57,7 @@ The git segment is in parentheses: the branch, then any operation in progress, t
   [`=`], [up to date with the upstream], [`(main =)`],
   [`>`#emph[n]], [#emph[n] commits ahead], [`(main >2)`],
   [`<`#emph[n]], [#emph[n] commits behind], [`(main <2)`],
-  [`><`#emph[a]`/`#emph[b]], [diverged: #emph[a] ahead, #emph[b] behind], [`(main ><1/2)`],
+  [`>`#emph[a]`<`#emph[b]], [diverged: #emph[a] ahead, #emph[b] behind], [`(main >1<2)`],
   [`+`#emph[n]], [#emph[n] staged], [`(main +3)`],
   [`*`#emph[n]], [#emph[n] modified], [`(main *1)`],
   [`%`#emph[n]], [#emph[n] untracked], [`(main %4)`],
@@ -82,7 +82,7 @@ This is the git part as `starship` reads it:
   up_to_date = "="
   ahead = ">${count}"
   behind = "<${count}"
-  diverged = "><${ahead_count}/${behind_count}"
+  diverged = ">${ahead_count}<${behind_count}"
   untracked = "%${count}"
   stashed = "\\$${count}"
   conflicted = "!${count}"
