@@ -48,6 +48,7 @@ Notes on programming languages, formal methods, computer systems, and miscellane
 
 == Posts
 
+#post(path("posts/prompt.typ")) <prompt>
 #post(path("posts/designing-thyme.typ")) <designing-thyme>
 #post(path("posts/rabbit-holes.typ")) <rabbit-holes>
 #post(path("posts/list.typ")) <list>

@@ -9,6 +9,7 @@ framework and no analytics.
 
 ## Posts
 
+- [The Perfect Prompt](https://blog.0xbf.ch/posts/prompt/): My `starship` prompt as a spec: `user@host:cwd` for `scp`, one `#` per shell level, an ASCII git status with every count, and the three config bugs that hid half of it.
 - [Designing `thyme`](https://blog.0xbf.ch/posts/designing-thyme/): How one Typst blog template became a static site library with a monochrome blog preset. Covers typed HTML, plain-text sources, CSS language switching without JavaScript, and the font and MathML problems in browsers.
 - [New Rabbit Holes Await](https://blog.0xbf.ch/posts/rabbit-holes/): The projects after `impli`: declarative Nix systems, a self-hosted Kubernetes cluster, Typst HTML output, and new languages.
 - [Feitk's List](https://blog.0xbf.ch/posts/list/): Twenty-one projects for the computer science generalist, as a counterpart to Robert A. Heinlein's list.
