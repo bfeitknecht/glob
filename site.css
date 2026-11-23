@@ -4,12 +4,9 @@
   /* Optically the gallery's Helvetica Neue 500: STIX Two has no 500 (it
      falls back to Regular), so SemiBold. */
   --heading-weight: 600;
-  /* The homepage title: as big as the gallery's, a little bigger. */
-  --title-size: clamp(4.4rem, 13vw, 11rem);
+  /* The homepage title: the gallery's size. */
+  --title-size: clamp(4rem, 12vw, 10rem);
   --title-tracking: -0.06em;
-  /* Page and post titles, entry titles: the gallery's page-intro and card sizes. */
-  --page-title-size: clamp(1.8rem, 4vw, 3.5rem);
-  --entry-title-size: clamp(1.3rem, 2.4vw, 2rem);
   /* Space under the top bar: the gallery's header. */
   --topbar-space: clamp(1.75rem, 3vw, 3rem);
 }

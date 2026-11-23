@@ -19,6 +19,13 @@
   show-reading: true,
   // Section links in the top bar, like the gallery's (thyme 0.1.4).
   nav: ("/", "/posts/", "/tags/"),
+  // The gallery's footer on every page (site.css).
+  footer: links(
+    link("https://0xbf.ch")[0xbf.ch],
+    link("/sitemap.xml")[sitemap],
+    [@rss[rss]],
+    [@atom[atom]],
+  ),
   // `/posts/`: every post in one list, newest first.
   pages: ((slug: "posts", title: [Posts], body: [= Posts
     #posts()
@@ -49,13 +56,6 @@ Notes on programming languages, formal methods, computer systems, and miscellane
 #post(path("posts/yak-shaving.typ")) <yak-shaving>
 #post(path("posts/impli.typ")) <impli>
 
-// Footer, styled like the gallery's (site.css).
-#html.footer(links(
-  link("https://0xbf.ch")[0xbf.ch],
-  link("sitemap.xml")[sitemap],
-  [@rss[rss]],
-  [@atom[atom]],
-))
 
 // Root fallbacks: Safari, iOS and tools ask for these without a <link>.
 // Rendered from favicon.svg (the round mark).
