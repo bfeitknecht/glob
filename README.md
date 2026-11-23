@@ -1,6 +1,6 @@
 # glob
 
-Personal blog at [blg.0xbf.ch](https://blg.0xbf.ch), written in [Typst](https://typst.app).
+Personal blog at [blog.0xbf.ch](https://blog.0xbf.ch), written in [Typst](https://typst.app).
 
 `site.typ` compiles with Typst `0.15.1` (`--features html,bundle --format bundle`) into one static
 bundle: HTML, MathML, CSS, and the Tadi Web `.typ` sources. The

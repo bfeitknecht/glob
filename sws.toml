@@ -28,9 +28,3 @@ headers = { Content-Type = "text/markdown; charset=utf-8", X-Content-Type-Option
 [[advanced.headers]]
 source = "**/*.typ"
 headers = { Content-Type = "text/plain; charset=utf-8", Content-Disposition = "inline", X-Content-Type-Options = "nosniff" }
-
-# Until thyme 0.1.4 the folder post `posts/gol/index.typ` was served at `/posts/index/`.
-[[advanced.redirects]]
-source = "/posts/index/{*}"
-destination = "/posts/gol/$1"
-kind = 301

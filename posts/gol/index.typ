@@ -48,11 +48,11 @@
   }
 }
 
-Apparently, scalable vector graphics files can run JavaScript via `<script>` tags#sidenote[Self-hosted here on `blg.0xbf.ch`, @gol-svg[`gol.svg`] lives right inside `posts/gol/` and is mounted via `<object type="image/svg+xml" data="gol.svg">` above so its `<script>` runs live in the page.]. It probably runs Doom too, but I've never implemented Conway's Game of Life, so that's what you get instead. You need to download and open in your own browser to see it in action due to security settings from GitHub disabling these tags to run.
+Apparently, scalable vector graphics files can run JavaScript via `<script>` tags#sidenote[Self-hosted here on `blog.0xbf.ch`, @gol-svg[`gol.svg`] lives right inside `posts/gol/` and is mounted via `<object type="image/svg+xml" data="gol.svg">` above so its `<script>` runs live in the page.]. It probably runs Doom too, but I've never implemented Conway's Game of Life, so that's what you get instead. You need to download and open in your own browser to see it in action due to security settings from GitHub disabling these tags to run.
 
 #zebraw(
   ```bash
-  curl -LO "https://blg.0xbf.ch/posts/gol/gol.svg"
+  curl -LO "https://blog.0xbf.ch/posts/gol/gol.svg"
   open -a Safari.app gol.svg
   ```,
 )

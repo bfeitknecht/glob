@@ -12,7 +12,7 @@
 
 #show: site.with(
   description: "Notes on programming languages, formal methods, systems, and sidequests.",
-  url: "https://blg.0xbf.ch",
+  url: "https://blog.0xbf.ch",
   author: "Basil Feitknecht",
   src: path("site.typ"),
   // Reading time (`<n> min`) beside the title on the entry cards (thyme 0.1.3).
