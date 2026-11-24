@@ -1,4 +1,4 @@
-#import "@preview/thyme:0.1.5": *
+#import "@preview/thyme:0.2.0": *
 #import blog: *
 
 #show: post.with(
@@ -67,7 +67,7 @@ In the PDF, sidenote underlines sat on the baseline: the OpenType `sups` glyph i
 
 Three defects compiled fine and only showed in a browser:
 
-#grid-table[
+#crosstab[
   | *Defect* | *Cause* | *Fix* |
   | --- | --- | --- |
   | Text looked bold and italic | Quoted `font-weight`/`font-style` descriptors are invalid CSS | Unquoted keywords |
@@ -80,7 +80,7 @@ The id bug hid well: the table of contents used the same wrong id, so every link
 = Numbers <numbers>
 
 #recipe[Measurements][
-  #grid-table[
+  #crosstab[
     | *Metric* | *Value* |
     | --- | --- |
     | Answer generation, whole session | `31 min 11 s` |
