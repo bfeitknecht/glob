@@ -30,7 +30,7 @@
   pages: ((slug: "posts", title: [Posts], body: [= Posts
     #posts()
   ]),),
-  // The mark from apex (ssg/favicon.typ there). Copy it again when it changes.
+  // The mark from apex (brand/, `just brand` there). Copy it again when it changes.
   favicon: path("favicon.svg"),
   robots: path("robots.txt"),
   stylesheets: (path("site.css"),),
