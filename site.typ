@@ -31,7 +31,8 @@
     #posts()
   ]),),
   // The mark from apex (brand/, `just brand` there). Copy it again when it changes.
-  favicon: path("favicon.svg"),
+  // The source is in assets/. The bundle serves it at /favicon.svg.
+  favicon: (path: "favicon.svg", data: path("assets/favicon.svg")),
   robots: path("robots.txt"),
   stylesheets: (path("site.css"),),
   llms: path("llms.txt"),
@@ -58,7 +59,7 @@ Notes on programming languages, formal methods, computer systems, and miscellane
 #post(path("posts/impli.typ")) <impli>
 
 
-// Root fallbacks: Safari, iOS and tools ask for these without a <link>.
-// Rendered from favicon.svg (the round mark).
-#file("favicon.ico", path("favicon.ico"))
-#file("apple-touch-icon.png", path("apple-touch-icon.png"))
+// Root fallbacks: Safari, iOS and tools ask for these without a <link>, so they must be at
+// the bundle root. The sources are in assets/. Rendered from assets/favicon.svg.
+#file("favicon.ico", path("assets/favicon.ico"))
+#file("apple-touch-icon.png", path("assets/apple-touch-icon.png"))

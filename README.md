@@ -43,7 +43,10 @@ sws.toml                             static-web-server config (no-cache HTML, lo
 Dockerfile                           $BUILDPLATFORM typst bundle -> FROM scratch + static-web-server
 justfile                             compile, check, fmt, serve, watch, image, run, release
 VERSION                              release version (X.Y.Z); `just release` tags v<VERSION>
-favicon.svg                          the ^@ mark, copied from apex (ssg/assets/favicon.svg)
+assets/                              icons, served at the bundle root (/favicon.svg, /favicon.ico, ...)
+├── favicon.svg                      the ^@ mark, copied from apex (brand/)
+├── favicon.ico                      rendered from favicon.svg
+└── apple-touch-icon.png             rendered from favicon.svg
 .github/workflows/publish-image.yaml multi-arch image build, using bfeitknecht/infra
 ```
 
