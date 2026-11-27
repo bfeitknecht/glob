@@ -16,7 +16,7 @@ And since we should measure the quality of a tool by its aesthetics, making the 
 Despite the veiled sarcasm, in this post I hope to present an argument for my specification of *The Perfect Prompt* and its actual benefit in functionality.
 
 ```
-alice@wonderland:~/Projects         # [1] (master +1*1 >1<2) 2026-11-24T00:47:08+0100
+alice@wonderland:~/Projects         # [1] (master *1+1 >1<2) 2026-11-24T00:47:08+0100
 %
 ```
 
@@ -34,6 +34,111 @@ Since the hash symbol starts comments in most all shell languages, it acts as a 
 Two things money can't buy. It's just nice to see the error code of the previous command. And so often I'm in need of the current ISO date time.
 
 == Git
+
+Inside a repository, the prompt gets a git segment in parentheses. Three `starship` modules fill it, in this order: `git_branch`, `git_state`, `git_status`. Outside a repository, the segment and its parentheses disappear.
+
+```
+(branch STATE n/m status ahead-behind)
+```
+
+Every symbol is plain ASCII and every count is shown. It reads the same in any font and any terminal.
+
+=== Branch
+
+`git_branch` shows the name of the branch and nothing else. No symbol, no remote name. A detached `HEAD` shows as `HEAD`.
+
+#tablem[
+  | *Case* | *Prompt* |
+  | :--- | :--- |
+  | on a branch | `(master =)` |
+  | no upstream | `(feature)` |
+  | detached `HEAD` | `(HEAD)` |
+]
+
+=== State
+
+`git_state` shows an operation in progress, in capitals. Rebase and `am` also show how far they are. A half-finished rebase cannot hide.
+
+#tablem[
+  | *Operation* | *Word* | *Prompt* |
+  | :--- | :--- | :--- |
+  | `git merge` | `MERGE` | `(master MERGE !1 >1)` |
+  | `git rebase` | `REBASE` | `(HEAD REBASE 1/2 !1)` |
+  | `git cherry-pick` | `CHERRY` | `(master CHERRY !1 >1)` |
+  | `git revert` | `REVERT` | `(master REVERT !1 >2)` |
+  | `git bisect` | `BISECT` | `(HEAD BISECT)` |
+  | `git am` | `AM` | `(master AM 1/1 >2)` |
+  | `am` or rebase (git cannot tell) | `AM/REBASE` | rare |
+]
+
+=== Status
+
+`git_status` shows the work tree first, then the relation to the upstream. Each symbol carries its count.
+
+#tablem[
+  | *Symbol* | *Meaning* | *Prompt* |
+  | :--- | :--- | :--- |
+  | `!`_n_ | _n_ files with conflicts | `(master MERGE !1 >1)` |
+  | `$`_n_ | _n_ stashes | `(master $2 =)` |
+  | `-`_n_ | _n_ files deleted | `(master -1 =)` |
+  | `~`_n_ | _n_ files renamed | `(master ~1 =)` |
+  | `*`_n_ | _n_ files modified | `(master *1 =)` |
+  | `+`_n_ | _n_ files staged | `(master +1 =)` |
+  | `%`_n_ | _n_ files untracked | `(master %1 =)` |
+  | `=` | up to date with the upstream | `(master =)` |
+  | `>`_n_ | _n_ commits ahead | `(master >1)` |
+  | `<`_n_ | _n_ commits behind | `(master <1)` |
+  | `>`_a_`<`_b_ | diverged: _a_ ahead, _b_ behind | `(master >1<1)` |
+]
+
+The order in the table is the order in the prompt. It is the default order of `$all_status` in `starship`. A busy repository looks like this:
+
+```
+(master $2*1+1%1 =)
+```
+
+Two stashes, one modified file, one staged file, one untracked file, up to date. A file that is staged and then modified again counts in both `+` and `*`. Without an upstream, the ahead-behind part is empty.
+
+The ASCII symbols are not only for looks. The `starship` defaults for deleted and renamed are `✘` and `»`, and a font without them shows a box.
+
+=== Config
+
+This is the git part of `starship.toml`:
+
+#zebraw(
+  ```toml
+  right_format = "($shlvl)( $status)( \\($git_branch( $git_state)($git_status)\\))( ${custom.time})"
+
+  [git_branch]
+  format = "$branch"
+
+  [git_state]
+  format = "$state( $progress_current/$progress_total)"
+  rebase = "REBASE"
+  merge = "MERGE"
+  revert = "REVERT"
+  cherry_pick = "CHERRY"
+  bisect = "BISECT"
+  am = "AM"
+  am_or_rebase = "AM/REBASE"
+
+  [git_status]
+  format = "( $all_status)( $ahead_behind)"
+  up_to_date = "="
+  ahead = ">${count}"
+  behind = "<${count}"
+  diverged = ">${ahead_count}<${behind_count}"
+  conflicted = "!${count}"
+  stashed = "\\$${count}"
+  deleted = "-${count}"
+  renamed = "~${count}"
+  modified = "*${count}"
+  staged = "+${count}"
+  untracked = "%${count}"
+  ```,
+)
+
+The `( ... )` groups in a format string drop out when everything inside them is empty. That is why a clean repository with no upstream shows only `(feature)`, without trailing spaces.
 
 == Nitty Gritty
 
@@ -61,15 +166,15 @@ Nix, Home Manager, starship, omni, zsh, nushell
 // #table(
 //   columns: 3,
 //   table.header[Symbol][Meaning][Example],
-//   [`=`], [up to date with the upstream], [`(main =)`],
-//   [`>`#emph[n]], [#emph[n] commits ahead], [`(main >2)`],
-//   [`<`#emph[n]], [#emph[n] commits behind], [`(main <2)`],
-//   [`>`#emph[a]`<`#emph[b]], [diverged: #emph[a] ahead, #emph[b] behind], [`(main >1<2)`],
-//   [`+`#emph[n]], [#emph[n] staged], [`(main +3)`],
-//   [`*`#emph[n]], [#emph[n] modified], [`(main *1)`],
-//   [`%`#emph[n]], [#emph[n] untracked], [`(main %4)`],
-//   [`$`#emph[n]], [#emph[n] stashes], [`(main $1)`],
-//   [`!`#emph[n]], [#emph[n] conflicts], [`(main !2)`],
+//   [`=`], [up to date with the upstream], [`(master =)`],
+//   [`>`#emph[n]], [#emph[n] commits ahead], [`(master >2)`],
+//   [`<`#emph[n]], [#emph[n] commits behind], [`(master <2)`],
+//   [`>`#emph[a]`<`#emph[b]], [diverged: #emph[a] ahead, #emph[b] behind], [`(master >1<2)`],
+//   [`+`#emph[n]], [#emph[n] staged], [`(master +3)`],
+//   [`*`#emph[n]], [#emph[n] modified], [`(master *1)`],
+//   [`%`#emph[n]], [#emph[n] untracked], [`(master %4)`],
+//   [`$`#emph[n]], [#emph[n] stashes], [`(master $1)`],
+//   [`!`#emph[n]], [#emph[n] conflicts], [`(master !2)`],
 // )
 //
 // An operation in progress shows up in capitals with its progress, so a half-finished rebase cannot hide: `(HEAD REBASE 1/3 !1)`. The others are `MERGE`, `REVERT`, `CHERRY`, `BISECT`, `AM` and `AM/REBASE`.
