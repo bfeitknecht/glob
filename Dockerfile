@@ -4,8 +4,12 @@
 # inline SVG diagrams exact glyph metrics. Stage 2 (`FROM scratch`) stays small.
 FROM --platform=$BUILDPLATFORM alpine:3.21 AS builder
 ARG BUILDARCH
+# renovate: datasource=github-releases depName=typst/typst extractVersion=^v(?<version>.*)$
 ARG TYPST_VERSION=0.15.1
+# Font bumps also need fonts/SHA256SUMS.
+# renovate: datasource=github-releases depName=stipub/stixfonts versioning=loose
 ARG STIX_VERSION=v2.13b171
+# renovate: datasource=github-releases depName=eigilnikolajsen/commit-mono extractVersion=^v(?<version>.*)$
 ARG COMMIT_MONO_VERSION=1.143
 
 RUN apk add --no-cache ca-certificates curl unzip xz && \
