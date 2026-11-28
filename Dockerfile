@@ -2,12 +2,13 @@
 # QEMU emulation for the multi-arch linux/amd64,linux/arm64 CI builds.
 # The .otf files of STIX Two and Commit Mono are in /fonts for Stage 1 only. They give the
 # inline SVG diagrams exact glyph metrics. Stage 2 (`FROM scratch`) stays small.
-FROM --platform=$BUILDPLATFORM alpine:3.21 AS builder
+FROM --platform=$BUILDPLATFORM alpine:3.24 AS builder
 ARG BUILDARCH
 # renovate: datasource=github-releases depName=typst/typst extractVersion=^v(?<version>.*)$
 ARG TYPST_VERSION=0.15.1
-# Font bumps also need fonts/SHA256SUMS.
-# renovate: datasource=github-releases depName=stipub/stixfonts versioning=loose
+# STIX stays at v2.13b171 (2021-05, the last full release): GitHub lists v2.13
+# as newer (it is older), and the v2.14 tag is an interim build without
+# fonts/static_otf. No Renovate annotation on purpose.
 ARG STIX_VERSION=v2.13b171
 # renovate: datasource=github-releases depName=eigilnikolajsen/commit-mono extractVersion=^v(?<version>.*)$
 ARG COMMIT_MONO_VERSION=1.143
@@ -39,7 +40,7 @@ RUN cd fonts && sha256sum -c SHA256SUMS && cd .. && \
 
 # Stage 2: static-web-server (Rust, about 4 MB, static, no runtime dependencies). It goes
 # into an empty filesystem. This is the same pattern as bfeitknecht/apex.
-FROM joseluisq/static-web-server:2.44.1-alpine AS sws
+FROM joseluisq/static-web-server:2.44.3-alpine AS sws
 
 FROM scratch
 
