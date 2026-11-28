@@ -7,104 +7,62 @@
   subtitle: [The rules I give every coding agent in my workspace],
   author: "Basil Feitknecht",
   created: datetime(year: 2026, month: 11, day: 16),
-  summary: [Write in Simplified Technical English. Put the result first. Ask before you guess. Never touch secrets or destroy without a "yes". Solve it the simple way. Get every tool from a Nix flake. One tool for each task.],
+  summary: [Write in Simplified Technical English. Expose a Nix dev shell. Use `just` as the one command runner. Pick modern tools. Format and lint in CI. Keep the interface small.],
   tags: ("agents", "workflow", "nix", "tooling"),
 )
 
-I work with coding agents every day. They read my repositories, run my commands, and write my commits. An agent does not remember the last session. It reads what is in front of it. So I give every agent the same file. My system config installs it as `AGENTS.md` for OpenCode and as `CLAUDE.md` for Claude Code. A project's own `AGENTS.md` adds to it and wins where the two differ.
+I work with coding agents every day. They read my repositories, run my commands, and write my commits. An agent does not remember the last session. It reads what is in the repository. So the repository must say what I want. This post collects the rules that I put into every `AGENTS.md`.
 
-The file has one main idea: there is one way to do each task. The agent uses the tool that the file names. It does not pick another.
+= Write in Simplified Technical English <ste>
 
-= How to talk to me <talk>
+All prose follows #link("https://www.asd-ste100.org")[ASD-STE100]. That includes comments, docs, commit messages, and pull request bodies.
 
-Long answers cost me effort. So the rules for text are strict.
+STE has a small vocabulary and short sentences. One sentence gives one instruction. Use the active voice. Do not use idioms.
 
-All prose follows #link("https://www.asd-ste100.org")[ASD-STE100] Simplified Technical English. That includes answers, comments, commit messages, and docs. Short sentences. One instruction per sentence. Active voice. A non-native reader gets the same meaning, and so does the next agent that reads the text.
+The reason is simple. An agent writes a lot of text, and I read all of it. Short, plain sentences are fast to read and hard to misread. A non-native reader gets the same meaning. A second agent that reads the text later gets the same meaning too.
 
-No LLM speak. No praise, no filler, no "Great question", no "Let me", no summary of what comes next. No emoji. No "it is not X, it is Y" contrast: say what it is.
+= Assume Nix, expose a dev shell <nix>
 
-The answer has a fixed shape:
+A repository that needs tools has a `flake.nix` with a dev shell. `nix develop` gives the exact compiler, formatter, and CLI versions that CI uses.
 
-- The result comes first. Then the important details as a short list. Then stop.
-- Headings and lists only when they help to scan. Tables for comparisons.
-- When the agent needs me to act (a login, a secret, a decision, a button in a UI), it says so in one line at the top.
-- Commands for me to type are in nushell syntax.
-- The agent reports what it ran and what failed. It does not claim a success that it did not check.
+The agent must not install tools globally. It must not tell me to `brew install` something. If a tool is missing, it goes into the dev shell. Then "it works on my machine" means "it works in the shell", and the shell is the same everywhere.
 
-When the agent is not sure what I want, it asks at once. One short question, 2 to 4 options, and its recommendation. A question costs me ten seconds. The wrong thing, built well, costs me an hour.
+= One command runner: `just` <just>
 
-= Safety <safety>
+Nix pins the tools. `just` gives them names. Every repository has a `justfile` with the same verbs:
 
-Some actions are hard to undo. The agent does not do them on its own.
+- `just` lists the recipes.
+- `just fmt` formats the tree. `just fmt --check` only reports. CI uses that form.
+- `just check` runs everything that CI runs: format check, lint, tests, build.
+- `just serve` starts a local preview, if the project has one.
+- `just image` builds the container image locally.
+- `just release` validates the version, then tags and pushes. `just release --check` only validates.
 
-- It does not read secrets: no `sops -d`, no `.env`, no key files, no token files, no `~/.ssh`, no `~/.gnupg`. If a task needs a secret, it asks me for it.
-- It does no destructive action without my explicit "yes" in this session. That covers deleted files and branches, `git push --force`, `git reset --hard`, history rewrites, `rm -rf`, dropped data, and deleted cloud or cluster resources.
-- It does not commit, push, tag, or open a pull request unless I ask.
-- It does not change the system configuration. All my machines are declared in one Nix flake: NixOS, nix-darwin, and Home Manager. If a tool or a setting is missing, the agent tells me the change to make there. It does not apply the change.
+The verbs are the interface. I do not need to remember if a project uses `cargo`, `uv`, `typst`, or `hugo`. An agent does not need to guess either. A recipe that CI also runs cannot drift away from CI.
 
-= Keep it simple <simple>
+= Use modern, good tools <tools>
 
-Solve the problem the simple way, with the least new code. Read the code first, and find every place that the change must reach. Then take the first option that fully works, in this order:
+Pick the tool that is fast, strict, and maintained:
 
-+ It is not needed at all.
-+ The project already has it.
-+ The standard library has it.
-+ A dependency that the project already has does it.
-+ The minimum new code.
+- Python: `uv` for environments and scripts, `ruff` for format and lint.
+- Rust: `cargo fmt` and `clippy` with warnings as errors.
+- Typst: `typstyle` with a pinned line width.
+- Containers: multi-arch builds with `docker buildx`.
 
-Deleting code beats adding code. No abstraction, wrapper, option, or config "for later". Three similar lines are better than a premature helper. Fix a bug at its root, once, and check all callers first.
+Pin the version of every tool. A formatter that changes between versions makes noise diffs.
 
-Be lazy about the solution, not about the change: finish it, test it, clean up. And some code is never "simple" to cut: input checks at trust boundaries, error handling that prevents data loss, and security.
+= Format and lint in CI, always <ci>
 
-= Keep things clean <clean>
+Every repository has a CI job that runs `just fmt --check` and the linter. The job fails on a diff. No exceptions for "small" repositories.
 
-- Scratch work goes in `/tmp`, in a new directory for each task (`mktemp -d`). Never in `$HOME`, never in a repository.
-- The agent writes only inside the project it works on. Build output and caches go in paths that `.gitignore` lists.
-- A dependency must earn its place. The standard library comes first. The agent says why it adds one.
-- The agent cleans up after itself. It deletes its scratch directories, stops the processes and terminal sessions it started, and deletes its own branches after the merge. It asks before it deletes anything that it did not make.
-- Languages, language servers, formatters, and tasks that only one project uses go in that project: the tools in its `flake.nix`, the editor settings in its `.zed/settings.json`. The global config stays small.
+This is the cheapest guard against agent drift. An agent can forget the formatter. CI does not forget.
 
-= Tools come from Nix flakes <nix>
+= Simple UI, UX, and DX <simple>
 
-Every project gets its tools from its own `flake.nix` (`devShells.default`) and `flake.lock`. `direnv` loads them with `use flake` in `.envrc`. All three files are committed. If a project has no flake and needs tools, the agent first writes a minimal one.
+Make the smallest interface that does the job. One page instead of three. One command instead of a flag matrix. One config file instead of four.
 
-The agent never installs a tool globally: no `brew install`, `npm -g`, `pip install`, `cargo install`, `go install`, `curl … | sh`, or `apt`, and no edits to shell profiles. For a tool that one command needs, it runs `nix run nixpkgs#<tool> -- …`. It finds a package with `nix search nixpkgs <name>`. If `nix` is not available, the agent says so and stops.
-
-So "it works on my machine" means "it works in the shell". The shell is the same on every machine and in CI.
-
-= Defaults <defaults>
-
-One tool for each task:
-
-#tablem[
-  | *Task* | *Use* |
-  | :--- | :--- |
-  | Search text, find files | `rg`, `fd` |
-  | JSON, YAML | `jq`, `yq` |
-  | Version control | `git` |
-  | GitHub, Forgejo, GitLab | `gh`, `tea`, `glab` |
-  | Python | `uv` (`pyproject.toml` and `uv.lock`), `ruff` for lint and format, `ty` for types |
-  | JavaScript, TypeScript | `bun` for new projects, else the package manager whose lock file exists. TypeScript `strict` |
-  | Rust | `cargo`, clean under `clippy` and `rustfmt` |
-  | Nix | `nixfmt`, flakes only: no channels, no `nix-env` |
-  | Shell scripts | POSIX `sh` or `bash` with `set -euo pipefail`, clean under `shellcheck` |
-  | Secrets in repositories | `sops` with age, encrypt only |
-  | Containers | `docker` with OrbStack on macOS, `podman` on Linux |
-  | Docs and papers | Typst |
-]
-
-Before the agent says it is done, it formats and lints with the project's tools and runs the tests that exist.
-
-= My system <system>
-
-The agent also gets a short map of my setup, so it does not have to guess:
-
-- Two machines: a MacBook on nix-darwin, and a NixOS VM in my cluster that is my main dev box. Tailscale connects them.
-- Long-running processes (servers, watchers, builds that take minutes) go in a #link("https://www.superlogical.com/rex")[Rex] session, not in the background of the agent's shell. Rex also reaches my other machine. The agent runs, watches, and types into sessions there as if they were local, instead of one-shot `ssh` commands.
-- My interactive shell is nushell, my login shell is zsh. The agent's own commands run in bash, and that is fine. The commands it writes for me are nushell.
-- My shell history is in atuin. To find how I did something before, the agent runs `atuin search --cmd-only <words>`, read only.
-- All repositories are in `~/Projects/<name>`.
+This rule applies to the developer experience too. A new contributor, human or agent, runs `nix develop` and then `just`. After that, everything is one verb away.
 
 = The short version <summary>
 
-Write plain English. Result first. Ask, do not guess. No secrets, nothing destructive without a "yes". The least code that works. Every tool from a Nix flake. One tool for each task.
+Write plain English. Pin tools in Nix. Name commands in `just`. Format and lint in CI. Keep it small.
